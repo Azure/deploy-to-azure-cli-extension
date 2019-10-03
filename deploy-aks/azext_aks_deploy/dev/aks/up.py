@@ -22,8 +22,6 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None):
         raise CLIError('The following arguments are required: --repository.')
     repo_name = _get_repo_name_from_repo_url(repository)
 
-    import pdb
-    pdb.set_trace()
     from azext_aks_deploy.dev.common.github_api_helper import get_languages_for_repo
     languages = get_languages_for_repo(repo_name)
     if not languages:
@@ -56,9 +54,12 @@ def get_yaml_template_for_repo(languages):
         files_to_return.append(Files(path='manifests/service.yml', content=SERVICE_MANIFEST))
         files_to_return.append(Files(path='manifests/deployment.yml', content=DEPLOYMENT_MANIFEST))
         return files_to_return
-    else:
+    elif 'Java' in languages and 'Dockerfile' in languages:
         logger.warning('Java app with dockerfile repository detected.')
         return ['javafile1','javafile2', 'javafile3']
+    else:
+        logger.debug('Languages detected : {} '.format(languages))
+        raise CLIError('The languages in this repository are not yet supported from up command.')
     
     
 def _get_repo_name_from_repo_url(repository_url):
