@@ -1,0 +1,30 @@
+# Python package
+# Create and test a Python package on multiple Python versions.
+# Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/python
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+strategy:
+  matrix:
+    Python36:
+      python.version: '3.6'
+
+steps:
+  - script: 'pip install --upgrade .'
+    displayName: 'Install CLI extension'
+    workingDirectory: 'deploy-aks/'
+
+  - script: 'python setup.py sdist bdist_wheel'
+    displayName: 'Build wheel for CLI extension'
+    workingDirectory: 'deploy-aks/'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Azure AKS deploy CLI extension as artifact'
+    inputs:
+      pathtoPublish: 'deploy-aks/dist' 
+      artifactName: 'deploy-aks-cli-extension' 
+      publishLocation: 'Container'
