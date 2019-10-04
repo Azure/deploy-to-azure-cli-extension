@@ -18,7 +18,7 @@ steps:
     displayName: 'Install CLI extension'
     workingDirectory: 'deploy-aks/'
 
-  - script: 'python setup.py sdist bdist_wheel'
+  - script: 'python setup.py bdist_wheel'
     displayName: 'Build wheel for CLI extension'
     workingDirectory: 'deploy-aks/'
 
