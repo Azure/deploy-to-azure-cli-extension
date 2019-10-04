@@ -37,12 +37,12 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None):
     from azext_aks_deploy.dev.common.azure_cli_resources import (get_default_subscription_info,
                                                                  get_aks_details,
                                                                  get_acr_details)
-    if aks_cluster is None:
-        cluster_details = get_aks_details(aks_cluster)
-        logger.debug(cluster_details)
-    if acr is None:
-        acr_details = get_acr_details(acr)
-        logger.debug(acr_details)
+    
+    cluster_details = get_aks_details(aks_cluster)
+    logger.debug(cluster_details)
+    acr_details = get_acr_details(acr)
+    logger.debug(acr_details)
+
     files = get_yaml_template_for_repo(languages.keys(), cluster_details, acr_details, repo_name)
     # File checkin
     logger.warning('Setting up your workflow. This will require 1 or more files to be checkedin to the repository.')
