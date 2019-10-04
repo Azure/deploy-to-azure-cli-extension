@@ -7,14 +7,8 @@ from knack.help_files import helps
 
 
 def load_admin_help():
-    # helps['aks'] = """
-    # type: group
-    # short-summary: Manage administration operations.
-    # long-summary:
-    # """
-
     helps['aks up'] = """
     type: command
-    short-summary: Deploy to AKS via GH actions.
+    short-summary: Deploy to AKS via GitHub actions.
     long-summary:
     """

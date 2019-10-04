@@ -34,7 +34,7 @@ def get_aks_details(name=None):
         for aks_clusters in aks_list:
             if not name:
                 cluster_choice_list.append(aks_clusters['name'])
-            elif name.lower() == aks_clusters['name']:
+            elif name.lower() == aks_clusters['name'].lower():
                 return aks_clusters
         if name is not None:
             raise CLIError('Cluster with name {} could not be found. Please check using command az aks list.'.format(name))
@@ -57,7 +57,7 @@ def get_acr_details(name=None):
         for acr_clusters in acr_list:
             if not name:
                 registry_choice_list.append(acr_clusters['name'])
-            elif name.lower() == acr_clusters['name']:
+            elif name.lower() == acr_clusters['name'].lower():
                 return acr_clusters
         if name is not None:
             raise CLIError('Container Registry with name {} could not be found. Please check using command az acr list.'.format(name))

@@ -14,10 +14,18 @@ logger = get_logger(__name__)
 
 def aks_deploy(aks_cluster=None, acr=None, repository=None):
     """Build and Deploy to AKS via GitHub actions
+    :param aks_cluster: Name of the cluster to select for deployment.
+    :type aks_cluster: str
+    :param acr: Name of the Azure Container Registry to be used for pushing the image.
+    :type acr: str
+    :param repository: GitHub repository URL e.g. https://github.com/azure/azure-cli.
+    :type repository: str
     """
     if repository is None:
         repository = get_repository_url_from_local_repo()
         logger.debug('Github Remote url detected local repo is {}'.format(repository))
+    if not repository:
+        repository = prompt('GitHub Repository url (e.g. https://github.com/atbagga/aks-deploy):')
     if not repository:
         raise CLIError('The following arguments are required: --repository.')
     repo_name = _get_repo_name_from_repo_url(repository)
@@ -35,20 +43,20 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None):
     if acr is None:
         acr_details = get_acr_details(acr)
         logger.debug(acr_details)
-    files = get_yaml_template_for_repo(languages.keys(), cluster_details, acr_details)
+    files = get_yaml_template_for_repo(languages.keys(), cluster_details, acr_details, repo_name)
     # File checkin
     logger.warning('Setting up your workflow. This will require 1 or more files to be checkedin to the repository.')
     for file_name in files:
-        logger.warning("Checkin file path: {}".format(file_name.path))
+        logger.debug("Checkin file path: {}".format(file_name.path))
         logger.debug("Checkin file content: {}".format(file_name.content))
 
-    push_files_github(files, repo_name, 'master', True, message="Setting up CI/CD with Azure CLI")
-    
-    logger.warning('GitHub workflow is setup for continuous deployment.')
+    push_files_github(files, repo_name, 'master', True, message="Setting up K8s deployment workflow.")
+    print('')
+    print('GitHub workflow is setup for continuous deployment.')
     return 
 
 
-def get_yaml_template_for_repo(languages, cluster_details, acr_details):
+def get_yaml_template_for_repo(languages, cluster_details, acr_details, repo_name):
     if 'JavaScript' in languages and 'Dockerfile' in languages:
         logger.warning('Nodejs with dockerfile repository detected.')
         files_to_return = []

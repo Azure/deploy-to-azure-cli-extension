@@ -1,5 +1,5 @@
 DEPLOY_TO_AKS_TEMPLATE = """name: CI
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
