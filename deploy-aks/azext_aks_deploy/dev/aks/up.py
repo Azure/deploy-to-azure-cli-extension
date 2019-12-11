@@ -9,6 +9,7 @@ from knack.util import CLIError
 
 from azext_aks_deploy.dev.common.git import get_repository_url_from_local_repo, uri_parse
 from azext_aks_deploy.dev.common.github_api_helper import Files
+from azext_aks_deploy.dev.resources.docker_helm_template import get_docker_and_helm_charts
 
 logger = get_logger(__name__)
 
@@ -34,6 +35,11 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None):
     languages = get_languages_for_repo(repo_name)
     if not languages:
         raise CLIError('Language detection has failed on this repository.')
+    elif 'Dockerfile' not in languages.keys():
+        language = list(languages.keys())[0]
+        docker_and_helm_charts = get_docker_and_helm_charts(language)
+        push_files_github(docker_and_helm_charts, repo_name, 'master', True, 
+                          message="Checking in dockerfile and helm charts for K8s deployment workflow.")
     from azext_aks_deploy.dev.common.azure_cli_resources import (get_default_subscription_info,
                                                                  get_aks_details,
                                                                  get_acr_details)
@@ -57,7 +63,7 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None):
 
 
 def get_yaml_template_for_repo(languages, cluster_details, acr_details, repo_name):
-    if 'JavaScript' in languages and 'Dockerfile' in languages:
+    if 'JavaScript' in languages:
         logger.warning('Nodejs with dockerfile repository detected.')
         files_to_return = []
         # Read template file
@@ -79,7 +85,7 @@ def get_yaml_template_for_repo(languages, cluster_details, acr_details, repo_nam
                 .replace(CLUSTER_PLACEHOLDER, cluster_details['name'])
                 .replace(RG_PLACEHOLDER, cluster_details['resourceGroup'])))
         return files_to_return
-    elif 'Java' in languages and 'Dockerfile' in languages:
+    elif 'Java' in languages:
         logger.warning('Java app with dockerfile repository detected.')
         files_to_return = []
         # Read template file
