@@ -38,8 +38,9 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None):
     elif 'Dockerfile' not in languages.keys():
         language = list(languages.keys())[0]
         docker_and_helm_charts = get_docker_and_helm_charts(language)
-        push_files_github(docker_and_helm_charts, repo_name, 'master', True, 
-                          message="Checking in dockerfile and helm charts for K8s deployment workflow.")
+        if docker_and_helm_charts:
+            push_files_github(docker_and_helm_charts, repo_name, 'master', True, 
+                              message="Checking in dockerfile and helm charts for K8s deployment workflow.")
     from azext_aks_deploy.dev.common.azure_cli_resources import (get_default_subscription_info,
                                                                  get_aks_details,
                                                                  get_acr_details)

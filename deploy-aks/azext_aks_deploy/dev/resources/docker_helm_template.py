@@ -11,42 +11,29 @@ from azext_aks_deploy.dev.common.github_api_helper import Files\
 logger = get_logger(__name__)
 PACKS_ROOT_STRING = os.path.sep+'packs'+os.path.sep
 FILE_ABSOLUTE_PATH = os.path.abspath(os.path.dirname(__file__))
-DOCKER_FILE_PATH = r'Dockerfile'
-def get_file_content(path):
-    try:
-        filecontent=open(path).read()
-        return filecontent
-    except Exception as ex:
-        raise CLIError(ex)
 
-
-def get_docker_template(language):
-    language_packs_path = get_supported_language_packs_path(language)
-    file_path = FILE_ABSOLUTE_PATH + language_packs_path + DOCKER_FILE_PATH
-    docker_file_content = get_file_content(file_path)
-    file_name = Files(path=DOCKER_FILE_PATH,content=docker_file_content)
-    logger.debug("Checkin file path: {}".format(file_name.path))
-    logger.debug("Checkin file content: {}".format(file_name.content))
-    return file_name
     
 def get_docker_and_helm_charts(language):
     language_packs_path = get_supported_language_packs_path(language)
     files = []
-    abs_pack_path = FILE_ABSOLUTE_PATH+language_packs_path
-    # r=root, d=directories, f = files
-    for r, d,f in os.walk(abs_pack_path):
-        for file in f:
-            if '__pycache__' not in r and '__init__.py' not in file:
-                file_path = os.path.join(r, file)
-                file_content = get_file_content(file_path)
-                if file_path.startswith(abs_pack_path):
-                    file_path=file_path[len(abs_pack_path):]
-                    file_path = file_path.replace('\\','/')
-                file_obj = Files(path=file_path,content=file_content)
-                logger.debug("Checkin file path: {}".format(file_path))
-                logger.debug("Checkin file content: {}".format(file_content))
-                files.append(file_obj)
-    return files
+    try:
+        abs_pack_path = FILE_ABSOLUTE_PATH+language_packs_path
+        # r=root, d=directories, f = files
+        for r, d,f in os.walk(abs_pack_path):
+            for file in f:
+                if '__pycache__' not in r and '__init__.py' not in file:
+                    file_path = os.path.join(r, file)
+                    file_content = open(file_path).read()
+                    if file_path.startswith(abs_pack_path):
+                        file_path=file_path[len(abs_pack_path):]
+                        file_path = file_path.replace('\\','/')
+                    file_obj = Files(path=file_path,content=file_content)
+                    logger.debug("Checkin file path: {}".format(file_path))
+                    logger.debug("Checkin file content: {}".format(file_content))
+                    files.append(file_obj)
+        return files
+    except Exception as ex:
+        raise CLIError(ex)
 
 
 def get_supported_language_packs_path(language):
