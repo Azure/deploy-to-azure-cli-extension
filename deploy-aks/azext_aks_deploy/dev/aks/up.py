@@ -9,6 +9,7 @@ from knack.util import CLIError
 
 from azext_aks_deploy.dev.common.git import get_repository_url_from_local_repo, uri_parse
 from azext_aks_deploy.dev.common.github_api_helper import Files
+from azext_aks_deploy.dev.common.github_azure_secrets import get_azure_credentials
 from azext_aks_deploy.dev.resources.docker_helm_template import get_docker_and_helm_charts
 
 logger = get_logger(__name__)
@@ -49,6 +50,8 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None):
     logger.debug(cluster_details)
     acr_details = get_acr_details(acr)
     logger.debug(acr_details)
+    # create azure service principal and display json on the screen for user to configure it as Github secrets
+    get_azure_credentials()
 
     files = get_yaml_template_for_repo(languages.keys(), cluster_details, acr_details, repo_name)
     # File checkin
