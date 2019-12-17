@@ -10,11 +10,11 @@ from knack.util import CLIError
 from azext_aks_deploy.dev.common.git import get_repository_url_from_local_repo, uri_parse
 from azext_aks_deploy.dev.common.github_api_helper import Files
 from azext_aks_deploy.dev.common.github_azure_secrets import get_azure_credentials
-from azext_aks_deploy.dev.resources.docker_helm_template import get_docker_and_helm_charts
+from azext_aks_deploy.dev.resources.docker_helm_template import get_docker_and_helm_charts,choose_supported_language
 
 logger = get_logger(__name__)
 
-def aks_deploy(aks_cluster=None, acr=None, repository=None):
+def aks_deploy(aks_cluster=None, acr=None, repository=None, skip_secrets_generation=False):
     """Build and Deploy to AKS via GitHub actions
     :param aks_cluster: Name of the cluster to select for deployment.
     :type aks_cluster: str
@@ -22,6 +22,8 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None):
     :type acr: str
     :param repository: GitHub repository URL e.g. https://github.com/azure/azure-cli.
     :type repository: str
+    :param skip_secrets_generation : Flag to skip generating Azure credentials
+    :type skip_secrets_generation: bool
     """
     if repository is None:
         repository = get_repository_url_from_local_repo()
@@ -37,8 +39,7 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None):
     if not languages:
         raise CLIError('Language detection has failed on this repository.')
     elif 'Dockerfile' not in languages.keys():
-        language = list(languages.keys())[0]
-        docker_and_helm_charts = get_docker_and_helm_charts(language)
+        docker_and_helm_charts = get_docker_and_helm_charts(languages)
         if docker_and_helm_charts:
             push_files_github(docker_and_helm_charts, repo_name, 'master', True, 
                               message="Checking in dockerfile and helm charts for K8s deployment workflow.")
@@ -51,9 +52,10 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None):
     acr_details = get_acr_details(acr)
     logger.debug(acr_details)
     # create azure service principal and display json on the screen for user to configure it as Github secrets
-    get_azure_credentials()
+    if not skip_secrets_generation:
+        get_azure_credentials()
 
-    files = get_yaml_template_for_repo(languages.keys(), cluster_details, acr_details, repo_name)
+    files = get_yaml_template_for_repo(languages, cluster_details, acr_details, repo_name)
     # File checkin
     logger.warning('Setting up your workflow. This will require 1 or more files to be checkedin to the repository.')
     for file_name in files:
@@ -67,8 +69,9 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None):
 
 
 def get_yaml_template_for_repo(languages, cluster_details, acr_details, repo_name):
-    if 'JavaScript' in languages:
-        logger.warning('Nodejs with dockerfile repository detected.')
+    language = choose_supported_language(languages)
+    if language:
+        logger.warning('%s repository detected.', language)
         files_to_return = []
         # Read template file
         from azext_aks_deploy.dev.resources.resourcefiles import DEPLOY_TO_AKS_TEMPLATE, DEPLOYMENT_MANIFEST, SERVICE_MANIFEST
@@ -88,28 +91,6 @@ def get_yaml_template_for_repo(languages, cluster_details, acr_details, repo_nam
                 .replace(ACR_PLACEHOLDER, acr_details['name'])
                 .replace(CLUSTER_PLACEHOLDER, cluster_details['name'])
                 .replace(RG_PLACEHOLDER, cluster_details['resourceGroup'])))
-        return files_to_return
-    elif 'Java' in languages:
-        logger.warning('Java app with dockerfile repository detected.')
-        files_to_return = []
-        # Read template file
-        from azext_aks_deploy.dev.resources.resourcefiles import DEPLOY_TO_AKS_TEMPLATE, DEPLOYMENT_MANIFEST, SERVICE_MANIFEST
-        
-        files_to_return.append(Files(path='manifests/service.yml',
-            content=SERVICE_MANIFEST
-                .replace(APP_NAME_PLACEHOLDER, APP_NAME_DEFAULT)
-                .replace(PORT_NUMBER_PLACEHOLDER, PORT_NUMBER_DEFAULT)))
-        files_to_return.append(Files(path='manifests/deployment.yml',
-            content=DEPLOYMENT_MANIFEST
-                .replace(APP_NAME_PLACEHOLDER, APP_NAME_DEFAULT)
-                .replace(ACR_PLACEHOLDER, acr_details['name'])
-                .replace(PORT_NUMBER_PLACEHOLDER, PORT_NUMBER_DEFAULT)))
-        files_to_return.append(Files(path='.github/workflows/main.yml',
-            content=DEPLOY_TO_AKS_TEMPLATE
-                .replace(APP_NAME_PLACEHOLDER, APP_NAME_DEFAULT)
-                .replace(ACR_PLACEHOLDER, acr_details['name'])
-                .replace(CLUSTER_PLACEHOLDER, aks_deploy['name'])
-                .replace(RG_PLACEHOLDER, aks_deploy['resourceGroup'])))
         return files_to_return
     else:
         logger.debug('Languages detected : {} '.format(languages))
