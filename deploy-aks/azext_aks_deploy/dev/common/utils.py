@@ -2,6 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import os
+import platform
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -60,6 +62,22 @@ def open_url(url):
     """
     from webbrowser import open_new
     open_new(url=url)
+
+# inspired from aks_preview
+def which(binary):
+    path_var = os.getenv('PATH')
+    if platform.system() == 'Windows':
+        binary = binary + '.exe'
+        parts = path_var.split(';')
+    else:
+        parts = path_var.split(':')
+
+    for part in parts:
+        bin_path = os.path.join(part, binary)
+        if os.path.exists(bin_path) and os.path.isfile(bin_path) and os.access(bin_path, os.X_OK):
+            return bin_path
+
+    return None
 
 
 # Decorators
