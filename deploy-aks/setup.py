@@ -59,5 +59,6 @@ setup(
     classifiers=CLASSIFIERS,
     package_data={'azext_aks_deploy': ['azext_metadata.json']},
     packages=find_packages(exclude=["*.test", "*.test.*", "test.*", "test"]),
+    include_package_data=True,
     install_requires=REQUIRES
 )

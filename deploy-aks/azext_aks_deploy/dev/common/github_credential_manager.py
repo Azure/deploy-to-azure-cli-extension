@@ -81,11 +81,12 @@ class GithubCredentialManager():
         return requests.post('https://api.github.com/authorizations',
                              json=body, headers=headers)
 
-    def get_token(self, note=None):
+    def get_token(self, note=None, display_warning=False):
         import os
         github_pat = os.getenv(AZ_DEVOPS_GITHUB_PAT_ENVKEY, None)
         if github_pat:
-            logger.warning('Using GitHub PAT token found in environment variable (%s).', AZ_DEVOPS_GITHUB_PAT_ENVKEY)
+            if display_warning:
+                logger.warning('Using GitHub PAT token found in environment variable (%s).', AZ_DEVOPS_GITHUB_PAT_ENVKEY)
             return github_pat
         if not self.token:
             self._create_token(note=note)

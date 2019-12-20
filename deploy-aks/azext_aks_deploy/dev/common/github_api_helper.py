@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import requests
+import time
 from knack.log import get_logger
 from knack.util import CLIError
 from azext_aks_deploy.dev.common.prompting import prompt_not_empty
@@ -21,10 +22,10 @@ class Files:  # pylint: disable=too-few-public-methods
         self.content = content
 
 
-def get_github_pat_token():
+def get_github_pat_token(display_warning=False):
     from azext_aks_deploy.dev.common.github_credential_manager import GithubCredentialManager
     github_manager = GithubCredentialManager()
-    return github_manager.get_token()
+    return github_manager.get_token(display_warning=display_warning)
 
 
 def get_github_repos_api_url(repo_id):
@@ -33,17 +34,17 @@ def get_github_repos_api_url(repo_id):
 
 def push_files_github(files, repo_name, branch, commit_to_branch, message="Set up CI with Azure Pipelines"):
     if commit_to_branch:
-        commit_files_to_github_branch(files, repo_name, branch, message)
-        return branch
+        return commit_files_to_github_branch(files, repo_name, branch, message)
+    # Commenting the PR flow for Docker and manifests checkin
     # Pull request flow
     # Create Branch
-    new_branch = create_github_branch(repo=repo_name, source=branch)
+    #new_branch = create_github_branch(repo=repo_name, source=branch)
     # Commit files to branch
-    commit_files_to_github_branch(files, repo_name, new_branch, message)
+    #commit_files_to_github_branch(files, repo_name, new_branch, message)
     # Create PR from new branch
-    pr = create_pr_github(branch, new_branch, repo_name, message)
-    print('Created a Pull Request - {url}'.format(url=pr['url']))
-    return new_branch
+    #pr = create_pr_github(branch, new_branch, repo_name, message)
+    #print('Created a Pull Request - {url}'.format(url=pr['url']))
+    #return new_branch
 
 
 def create_pr_github(branch, new_branch, repo_name, message):
@@ -130,7 +131,9 @@ def get_github_branch(repo, branch):
 def commit_files_to_github_branch(files, repo_name, branch, message):
     if files:
         for file in files:
-            commit_file_to_github_branch(file.path, file.content, repo_name, branch, message)
+            commit_sha = commit_file_to_github_branch(file.path, file.content, repo_name, branch, message)
+        # returning last commit sha
+        return commit_sha
     else:
         raise CLIError("No files to checkin.")
 
@@ -138,6 +141,10 @@ def commit_files_to_github_branch(files, repo_name, branch, message):
 def get_application_json_header():
     return {'Content-Type': 'application/json' + '; charset=utf-8',
             'Accept': 'application/json'}
+
+
+def get_application_json_header_for_preview():
+    return {'Accept': 'application/vnd.github.antiope-preview+json'}
 
 
 def commit_file_to_github_branch(path_to_commit, content, repo_name, branch, message):
@@ -165,6 +172,10 @@ def commit_file_to_github_branch(path_to_commit, content, repo_name, branch, mes
         if not response.status_code == _HTTP_CREATED_STATUS:
             raise CLIError('GitHub file checkin failed for file ({file}). Status Code ({code}).'.format(
                 file=path_to_commit, code=response.status_code))
+        else:
+            commit_obj = response.json()['commit']
+            commit_sha = commit_obj['sha']
+            return commit_sha
     else:
         raise CLIError('GitHub file checkin failed. File path or content is empty.')
 
@@ -180,3 +191,50 @@ def get_languages_for_repo(repo_name):
         raise CLIError('Get Languages failed. Error: ({err})'.format(err=get_response.reason))
     import json
     return json.loads(get_response.text)
+
+def get_check_runs_for_commit(repo_name,commmit_sha):
+    """
+    API Documentation - https://developer.github.com/v3/checks/runs/#list-check-runs-for-a-specific-ref
+    """
+    token = get_github_pat_token()
+    headers = get_application_json_header_for_preview()
+    time.sleep(1)
+    get_check_runs_url = 'https://api.github.com/repos/{repo_id}/commits/{ref}/check-runs'.format(repo_id=repo_name,ref=commmit_sha)
+    get_response = requests.get(url=get_check_runs_url, auth=('', token), headers=headers)
+    if not get_response.status_code == _HTTP_SUCCESS_STATUS:
+        raise CLIError('Get Check Runs failed. Error: ({err})'.format(err=get_response.reason))
+    import json
+    return json.loads(get_response.text)
+
+
+def get_work_flow_check_runID(repo_name,commmit_sha):
+    check_run_found= False
+    count = 0
+    while(not check_run_found or count>3):
+        check_runs_list_response = get_check_runs_for_commit(repo_name,commmit_sha)
+        if check_runs_list_response and check_runs_list_response['total_count'] > 0:
+            # fetch the Github actions check run and its check run ID
+            check_runs_list = check_runs_list_response['check_runs']
+            for check_run in check_runs_list:
+                if check_run['app']['slug'] == 'github-actions':
+                    check_run_id = check_run['id']
+                    check_run_found = True
+                    return check_run_id
+        time.sleep(5)
+        count = count+1
+    raise CLIError("Couldn't find Github Actions check run. Please check 'Actions' tab in your Github repo.")
+    
+
+def get_check_run_status_and_conclusion(repo_name, check_run_id):
+    """
+    API Documentation - https://developer.github.com/v3/checks/runs/#get-a-single-check-run
+    """
+    token = get_github_pat_token()
+    headers = get_application_json_header_for_preview()
+    get_check_run_url = 'https://api.github.com/repos/{repo_id}/check-runs/{checkID}'.format(repo_id=repo_name,checkID=check_run_id)
+    get_response = requests.get(url=get_check_run_url, auth=('', token), headers=headers)
+    if not get_response.status_code == _HTTP_SUCCESS_STATUS:
+        raise CLIError('Get Check Run failed. Error: ({err})'.format(err=get_response.reason))
+    import json
+    return json.loads(get_response.text)['status'], json.loads(get_response.text)['conclusion']
+    
