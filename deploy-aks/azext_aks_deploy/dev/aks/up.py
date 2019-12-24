@@ -13,13 +13,13 @@ from azext_aks_deploy.dev.common.github_api_helper import (Files, get_work_flow_
 from azext_aks_deploy.dev.common.github_azure_secrets import get_azure_credentials
 from azext_aks_deploy.dev.common.kubectl import get_deployment_IP_port
 from azext_aks_deploy.dev.common.const import ( APP_NAME_DEFAULT, APP_NAME_PLACEHOLDER,
-                                                ACR_PLACEHOLDER, RG_PLACEHOLDER,
+                                                ACR_PLACEHOLDER, RG_PLACEHOLDER, PORT_NUMBER_DEFAULT,
                                                 CLUSTER_PLACEHOLDER, RELEASE_PLACEHOLDER, RELEASE_NAME)
 from azext_aks_deploy.dev.aks.docker_helm_template import get_docker_templates,get_helm_charts
 
 logger = get_logger(__name__)
 
-def aks_deploy(aks_cluster=None, acr=None, repository=None, skip_secrets_generation=False, do_not_wait=False):
+def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, skip_secrets_generation=False, do_not_wait=False):
     """Build and Deploy to AKS via GitHub actions
     :param aks_cluster: Name of the cluster to select for deployment.
     :type aks_cluster: str
@@ -27,6 +27,8 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, skip_secrets_generat
     :type acr: str
     :param repository: GitHub repository URL e.g. https://github.com/azure/azure-cli.
     :type repository: str
+    :param port: Port on which your application runs. Default is 8080
+    :type port:str
     :param skip_secrets_generation : Flag to skip generating Azure credentials.
     :type skip_secrets_generation: bool
     :param do_not_wait : Do not wait for workflow completion.
@@ -63,10 +65,12 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, skip_secrets_generat
     logger.debug(cluster_details)
     acr_details = get_acr_details(acr)
     logger.debug(acr_details)
- 
+
+    if port is None:
+        port = PORT_NUMBER_DEFAULT
     if 'Dockerfile' not in languages.keys():
         # check in docker file and docker ignore  
-        docker_files = get_docker_templates(language)
+        docker_files = get_docker_templates(language, port)
         if docker_files:
             push_files_github(docker_files, repo_name, 'master', True, 
                             message="Checking in docker files for K8s deployment workflow.")
@@ -74,7 +78,7 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, skip_secrets_generat
         logger.warning('Using the Dockerfile found in the repository {}'.format(repo_name))
 
     # check in helm charts
-    helm_charts = get_helm_charts(language, acr_details)
+    helm_charts = get_helm_charts(language, acr_details, port)
     if helm_charts:
         push_files_github(helm_charts, repo_name, 'master', True, 
                             message="Checking in helm charts for K8s deployment workflow.")
