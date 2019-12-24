@@ -6,8 +6,8 @@ image:
   repository: container_registry_name_place_holder.azurecr.io/app_name_place_holder
   tag: ${{ github.sha }}
   pullPolicy: IfNotPresent
-nameOverride: "nodehelmcharts"
-fullnameOverride: "nodehelmcharts"
+nameOverride: "javascript"
+fullnameOverride: "javascript"
 service:
   name: node
   type: LoadBalancer
