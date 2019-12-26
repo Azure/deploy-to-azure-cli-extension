@@ -60,7 +60,8 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, skip_secr
 
     from azext_aks_deploy.dev.common.azure_cli_resources import (get_default_subscription_info,
                                                                  get_aks_details,
-                                                                 get_acr_details)
+                                                                 get_acr_details,
+                                                                 configure_aks_credentials)
     cluster_details = get_aks_details(aks_cluster)
     logger.debug(cluster_details)
     acr_details = get_acr_details(acr)
@@ -102,6 +103,7 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, skip_secr
     print('')
     if not do_not_wait:
         poll_workflow_status(repo_name,check_run_id)
+        configure_aks_credentials(cluster_details['name'],cluster_details['resourceGroup'])
         deployment_ip, port = get_deployment_IP_port(RELEASE_NAME,language)
         print('Your app is deployed at :http://{ip}:{port}'.format(ip=deployment_ip,port=port))
     return

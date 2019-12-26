@@ -64,3 +64,13 @@ def get_acr_details(name=None):
         registry_choice = prompt_user_friendly_choice_list(
             "Which Azure Container Registry do you want to use for this pipeline?", registry_choice_list)
         return acr_list[registry_choice]
+
+def configure_aks_credentials(cluster_name,resource_group):
+    try:
+        import subprocess
+        import json
+        subscription_id, subscription_name, tenant_id, environment_name = get_default_subscription_info()
+        logger.warning("Using your default Azure subscription %s for getting AKS cluster credentials.", subscription_name)
+        aks_creds = subprocess.check_output('az aks get-credentials -n {} -g {} -o json'.format(cluster_name,resource_group), shell=True)
+    except Exception as ex:
+        raise CLIError(ex)    
