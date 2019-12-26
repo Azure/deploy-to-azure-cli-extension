@@ -10,7 +10,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azext_aks_deploy.dev.common.utils import datetime_now_as_string, singleton
 
-AZ_DEVOPS_GITHUB_PAT_ENVKEY = "GITHUB_PAT"
+AKS_UP_GITHUB_PAT_ENVKEY = "GITHUB_PAT"
 
 logger = get_logger(__name__)
 
@@ -29,7 +29,7 @@ class GithubCredentialManager():
         logger.warning('We need to create a Personal Access Token to communicate with GitHub. '
                        'A new PAT with scopes (admin:repo_hook, repo, user) will be created.')
         logger.warning('You can set the PAT in the environment variable (%s) to avoid getting prompted.',
-                       AZ_DEVOPS_GITHUB_PAT_ENVKEY)
+                       AKS_UP_GITHUB_PAT_ENVKEY)
         self.username = prompt(msg='Enter your GitHub username (leave blank for using already generated PAT): ')
         print('')
         if not self.username:
@@ -41,7 +41,7 @@ class GithubCredentialManager():
         self.password = prompt_pass(msg='Enter your GitHub password: ', confirm=True)
         print('')
         if not note:
-            note = "AzureDevopsCLIExtensionToken_" + datetime_now_as_string()
+            note = "AksUpCLIExtensionToken_" + datetime_now_as_string()
         encoded_pass = base64.b64encode(self.username.encode('utf-8') + b':' + self.password.encode('utf-8'))
         basic_auth = 'basic ' + encoded_pass.decode("utf-8")
         request_body = {
@@ -83,10 +83,10 @@ class GithubCredentialManager():
 
     def get_token(self, note=None, display_warning=False):
         import os
-        github_pat = os.getenv(AZ_DEVOPS_GITHUB_PAT_ENVKEY, None)
+        github_pat = os.getenv(AKS_UP_GITHUB_PAT_ENVKEY, None)
         if github_pat:
             if display_warning:
-                logger.warning('Using GitHub PAT token found in environment variable (%s).', AZ_DEVOPS_GITHUB_PAT_ENVKEY)
+                logger.warning('Using GitHub PAT token found in environment variable (%s).', AKS_UP_GITHUB_PAT_ENVKEY)
             return github_pat
         if not self.token:
             self._create_token(note=note)

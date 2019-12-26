@@ -1,2 +1,2 @@
-Microsoft DevOps CLI Extension for Windows, Mac and Linux
+Microsoft aks up CLI Extension for Windows, Mac and Linux
 =========================================================
