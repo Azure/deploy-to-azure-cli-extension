@@ -11,8 +11,8 @@ fullnameOverride: "java"
 service:
   name: java
   type: LoadBalancer
-  externalPort: 8080
-  internalPort: 8080
+  externalPort: port_number_place_holder
+  internalPort: port_number_place_holder
 resources:
   limits:
     cpu: 100m

@@ -1,6 +1,6 @@
 FROM python
-ENV PORT 8080
-EXPOSE 8080
+ENV PORT port_number_place_holder
+EXPOSE port_number_place_holder
 WORKDIR /usr/src/app
 
 COPY requirements.txt ./
