@@ -25,7 +25,7 @@ class GithubCredentialManager():
         self.password = None
         self.token = None
 
-    def _create_token(self, note=None):
+    def _create_token(self, repo_name, note=None):
         logger.warning('We need to create a Personal Access Token to communicate with GitHub. '
                        'A new PAT with scopes (admin:repo_hook, repo, user) will be created.')
         logger.warning('You can set the PAT in the environment variable (%s) to avoid getting prompted.',
@@ -41,7 +41,7 @@ class GithubCredentialManager():
         self.password = prompt_pass(msg='Enter your GitHub password: ', confirm=True)
         print('')
         if not note:
-            note = "AksUpCLIExtensionToken_" + datetime_now_as_string()
+            note = repo_name + "_AksUpCLIExtensionToken_" + datetime_now_as_string()
         encoded_pass = base64.b64encode(self.username.encode('utf-8') + b':' + self.password.encode('utf-8'))
         basic_auth = 'basic ' + encoded_pass.decode("utf-8")
         request_body = {
@@ -70,7 +70,7 @@ class GithubCredentialManager():
         import json
         response_json = json.loads(response.content)
         if response.status_code == 200 or response.status_code == 201:
-            logger.warning('Created new personal access token with scopes (admin:repo_hook, repo, user). Name: %s '
+            logger.warning('Created new personal access token with scopes - admin:repo_hook, repo, user. Name: %s '
                            'You can revoke this from your GitHub settings if the pipeline is no longer required.',
                            note)
             self.token = response_json['token']
@@ -81,7 +81,7 @@ class GithubCredentialManager():
         return requests.post('https://api.github.com/authorizations',
                              json=body, headers=headers)
 
-    def get_token(self, note=None, display_warning=False):
+    def get_token(self, repo_name, note=None, display_warning=False):
         import os
         github_pat = os.getenv(AKS_UP_GITHUB_PAT_ENVKEY, None)
         if github_pat:
@@ -89,5 +89,5 @@ class GithubCredentialManager():
                 logger.warning('Using GitHub PAT token found in environment variable (%s).', AKS_UP_GITHUB_PAT_ENVKEY)
             return github_pat
         if not self.token:
-            self._create_token(note=note)
+            self._create_token(repo_name=repo_name,note=note)
         return self.token

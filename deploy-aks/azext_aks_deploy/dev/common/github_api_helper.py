@@ -22,10 +22,10 @@ class Files:  # pylint: disable=too-few-public-methods
         self.content = content
 
 
-def get_github_pat_token(display_warning=False):
+def get_github_pat_token(repo_name,display_warning=False):
     from azext_aks_deploy.dev.common.github_credential_manager import GithubCredentialManager
     github_manager = GithubCredentialManager()
-    return github_manager.get_token(display_warning=display_warning)
+    return github_manager.get_token(repo_name=repo_name,display_warning=display_warning)
 
 
 def get_github_repos_api_url(repo_id):
@@ -51,7 +51,7 @@ def create_pr_github(branch, new_branch, repo_name, message):
     """
     API Documentation - https://developer.github.com/v3/pulls/#create-a-pull-request
     """
-    token = get_github_pat_token()
+    token = get_github_pat_token(repo_name)
     create_pr_url = 'https://api.github.com/repos/{repo_id}/pulls'.format(repo_id=repo_name)
     create_pr_request_body = {
         "title": message,
@@ -70,7 +70,7 @@ def create_github_branch(repo, source):
     """
     API Documentation - https://developer.github.com/v3/git/refs/#create-a-reference
     """
-    token = get_github_pat_token()
+    token = get_github_pat_token(repo)
     # Validate new branch name is valid
     branch_is_valid = False
     while not branch_is_valid:
@@ -104,7 +104,7 @@ def get_github_branch(repo, branch):
     branch : None if the branch with this name does not exist else branch ref
     is_folder : True or False
     """
-    token = get_github_pat_token()
+    token = get_github_pat_token(repo)
     head_ref_name = resolve_git_ref_heads(branch).lower()
     get_branch_url = 'https://api.github.com/repos/{repo_id}/git/{refs_heads_branch}'.format(
         repo_id=repo, refs_heads_branch=head_ref_name)
@@ -164,7 +164,7 @@ def commit_file_to_github_branch(path_to_commit, content, repo_name, branch, mes
             "branch": branch,
             "content": encoded_content
         }
-        token = get_github_pat_token()
+        token = get_github_pat_token(repo_name)
         logger.warning('Checking in file %s in the Github repository %s', path_to_commit, repo_name)
         response = requests.put(url_for_github_file_api, auth=('', token),
                                 json=request_body, headers=headers)
@@ -184,7 +184,7 @@ def get_languages_for_repo(repo_name):
     """
     API Documentation - https://developer.github.com/v3/repos/#list-languages
     """
-    token = get_github_pat_token()
+    token = get_github_pat_token(repo_name)
     get_languagues_url = 'https://api.github.com/repos/{repo_id}/languages'.format(repo_id=repo_name)
     get_response = requests.get(url=get_languagues_url, auth=('', token))
     if not get_response.status_code == _HTTP_SUCCESS_STATUS:
@@ -196,7 +196,7 @@ def get_check_runs_for_commit(repo_name,commmit_sha):
     """
     API Documentation - https://developer.github.com/v3/checks/runs/#list-check-runs-for-a-specific-ref
     """
-    token = get_github_pat_token()
+    token = get_github_pat_token(repo_name)
     headers = get_application_json_header_for_preview()
     time.sleep(1)
     get_check_runs_url = 'https://api.github.com/repos/{repo_id}/commits/{ref}/check-runs'.format(repo_id=repo_name,ref=commmit_sha)
@@ -229,7 +229,7 @@ def get_check_run_status_and_conclusion(repo_name, check_run_id):
     """
     API Documentation - https://developer.github.com/v3/checks/runs/#get-a-single-check-run
     """
-    token = get_github_pat_token()
+    token = get_github_pat_token(repo_name)
     headers = get_application_json_header_for_preview()
     get_check_run_url = 'https://api.github.com/repos/{repo_id}/check-runs/{checkID}'.format(repo_id=repo_name,checkID=check_run_id)
     get_response = requests.get(url=get_check_run_url, auth=('', token), headers=headers)
