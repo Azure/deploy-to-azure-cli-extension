@@ -71,6 +71,6 @@ def configure_aks_credentials(cluster_name,resource_group):
         import json
         subscription_id, subscription_name, tenant_id, environment_name = get_default_subscription_info()
         logger.warning("Using your default Azure subscription %s for getting AKS cluster credentials.", subscription_name)
-        aks_creds = subprocess.check_output('az aks get-credentials -n {} -g {} -o json'.format(cluster_name,resource_group), shell=True)
+        aks_creds = subprocess.check_output('az aks get-credentials -n {cluster_name} -g {group_name} -o json'.format(cluster_name=cluster_name,group_name=resource_group), shell=True)
     except Exception as ex:
         raise CLIError(ex)    
