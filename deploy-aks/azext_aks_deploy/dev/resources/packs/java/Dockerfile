@@ -4,9 +4,9 @@ COPY . /usr/src/app
 RUN mvn --batch-mode -f /usr/src/app/pom.xml clean package
 
 FROM openjdk:11-jre-slim
-ENV PORT 8080
-EXPOSE 8080
-COPY --from=BUILD /usr/src/app/target /opt/target
+ENV SERVER_PORT port_number_place_holder
+EXPOSE port_number_place_holder
+COPY --from=BUILD /usr/src/app/target/*.jar /opt/target/app.jar
 WORKDIR /opt/target
 
-CMD ["/bin/bash", "-c", "find -type f -name '*-with-dependencies.jar' | xargs java -jar"]
+CMD ["java", "-jar", "/opt/target/app.jar", "--server.port=port_number_place_holder" ]

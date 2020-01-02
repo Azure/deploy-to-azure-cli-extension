@@ -31,40 +31,18 @@ jobs:
         container-registry-password: ${{ secrets.REGISTRY_PASSWORD }}
         secret-name: demo-k8s-secret
 
+    - uses: azure/k8s-bake@v1
+      with:
+        renderEngine: 'helm2'
+        helmChart: './charts/'
+        releaseName: release_name_place_holder
+      id: bake
+
     - uses: Azure/k8s-deploy@v1
       with:
-        manifests: |
-          manifests/deployment.yml
-          manifests/service.yml
+        manifests: ${{ steps.bake.outputs.manifestsBundle }}
         images: |
           container_registry_name_place_holder.azurecr.io/app_name_place_holder:${{ github.sha }}
         imagepullsecrets: |
           demo-k8s-secret"""
 
-DEPLOYMENT_MANIFEST = """apiVersion : apps/v1beta1
-kind: Deployment 
-metadata: 
-  name: app_name_place_holder 
-spec:
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: app_name_place_holder 
-    spec:
-      containers:
-        - name: app_name_place_holder 
-          image: container_registry_name_place_holder.azurecr.io/app_name_place_holder 
-          ports:
-          - containerPort: port_number_place_holder"""
-
-SERVICE_MANIFEST = """apiVersion: v1
-kind: Service
-metadata:
-    name: app_name_place_holder
-spec:
-    type: LoadBalancer
-    ports:
-    - port: port_number_place_holder 
-    selector:
-        app: app_name_place_holder"""

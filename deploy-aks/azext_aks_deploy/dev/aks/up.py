@@ -12,11 +12,14 @@ from azext_aks_deploy.dev.common.github_api_helper import (Files, get_work_flow_
                                                      get_check_run_status_and_conclusion ,get_github_pat_token)
 from azext_aks_deploy.dev.common.github_azure_secrets import get_azure_credentials
 from azext_aks_deploy.dev.common.kubectl import get_deployment_IP_port
-from azext_aks_deploy.dev.resources.docker_helm_template import get_docker_and_helm_charts,choose_supported_language
+from azext_aks_deploy.dev.common.const import ( APP_NAME_DEFAULT, APP_NAME_PLACEHOLDER,
+                                                ACR_PLACEHOLDER, RG_PLACEHOLDER, PORT_NUMBER_DEFAULT,
+                                                CLUSTER_PLACEHOLDER, RELEASE_PLACEHOLDER, RELEASE_NAME)
+from azext_aks_deploy.dev.aks.docker_helm_template import get_docker_templates,get_helm_charts
 
 logger = get_logger(__name__)
 
-def aks_deploy(aks_cluster=None, acr=None, repository=None, skip_secrets_generation=False, do_not_wait=False):
+def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, skip_secrets_generation=False, do_not_wait=False):
     """Build and Deploy to AKS via GitHub actions
     :param aks_cluster: Name of the cluster to select for deployment.
     :type aks_cluster: str
@@ -24,6 +27,8 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, skip_secrets_generat
     :type acr: str
     :param repository: GitHub repository URL e.g. https://github.com/azure/azure-cli.
     :type repository: str
+    :param port: Port on which your application runs. Default is 8080
+    :type port:str
     :param skip_secrets_generation : Flag to skip generating Azure credentials.
     :type skip_secrets_generation: bool
     :param do_not_wait : Do not wait for workflow completion.
@@ -39,30 +44,52 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, skip_secrets_generat
     repo_name = _get_repo_name_from_repo_url(repository)
 
     from azext_aks_deploy.dev.common.github_api_helper import get_languages_for_repo, push_files_github
-    get_github_pat_token(display_warning=True)                                                              
+    get_github_pat_token(display_warning=True)
+    logger.warning('Setting up your workflow. This will require 1 or more files to be checkedin to the repository.')                                                           
+
     languages = get_languages_for_repo(repo_name)
     if not languages:
         raise CLIError('Language detection has failed on this repository.')
-    elif 'Dockerfile' not in languages.keys():
-        docker_and_helm_charts = get_docker_and_helm_charts(languages)
-        if docker_and_helm_charts:
-            push_files_github(docker_and_helm_charts, repo_name, 'master', True, 
-                              message="Checking in dockerfile for K8s deployment workflow.")
+    
+    language = choose_supported_language(languages)
+    if language:
+        logger.warning('%s repository detected.', language)
+    else:
+        logger.debug('Languages detected : {} '.format(languages))
+        raise CLIError('The languages in this repository are not yet supported from up command.')
+
     from azext_aks_deploy.dev.common.azure_cli_resources import (get_default_subscription_info,
                                                                  get_aks_details,
-                                                                 get_acr_details)
-    
+                                                                 get_acr_details,
+                                                                 configure_aks_credentials)
     cluster_details = get_aks_details(aks_cluster)
     logger.debug(cluster_details)
     acr_details = get_acr_details(acr)
     logger.debug(acr_details)
+
+    if port is None:
+        port = PORT_NUMBER_DEFAULT
+    if 'Dockerfile' not in languages.keys():
+        # check in docker file and docker ignore  
+        docker_files = get_docker_templates(language, port)
+        if docker_files:
+            push_files_github(docker_files, repo_name, 'master', True, 
+                            message="Checking in docker files for K8s deployment workflow.")
+    else:
+        logger.warning('Using the Dockerfile found in the repository {}'.format(repo_name))
+
+    # check in helm charts
+    helm_charts = get_helm_charts(language, acr_details, port)
+    if helm_charts:
+        push_files_github(helm_charts, repo_name, 'master', True, 
+                            message="Checking in helm charts for K8s deployment workflow.")
+
     # create azure service principal and display json on the screen for user to configure it as Github secrets
     if not skip_secrets_generation:
         get_azure_credentials()
 
-    files = get_yaml_template_for_repo(languages, cluster_details, acr_details, repo_name)
+    files = get_yaml_template_for_repo(language, cluster_details, acr_details, repo_name)
     # File checkin
-    logger.warning('Setting up your workflow. This will require 1 or more files to be checkedin to the repository.')
     for file_name in files:
         logger.debug("Checkin file path: {}".format(file_name.path))
         logger.debug("Checkin file content: {}".format(file_name.content))
@@ -76,7 +103,8 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, skip_secrets_generat
     print('')
     if not do_not_wait:
         poll_workflow_status(repo_name,check_run_id)
-        deployment_ip, port = get_deployment_IP_port(APP_NAME_DEFAULT)
+        configure_aks_credentials(cluster_details['name'],cluster_details['resourceGroup'])
+        deployment_ip, port = get_deployment_IP_port(RELEASE_NAME,language)
         print('Your app is deployed at :http://{ip}:{port}'.format(ip=deployment_ip,port=port))
     return
 
@@ -114,37 +142,34 @@ def poll_workflow_status(repo_name,check_run_id):
     if check_run_conclusion == 'success':
         print('Workflow succeeded')
     else:
-        raise CLIError('Workflow failed!')
+        raise CLIError('Workflow status: {}'.format(check_run_conclusion))
 
 
-def get_yaml_template_for_repo(languages, cluster_details, acr_details, repo_name):
-    language = choose_supported_language(languages)
-    if language:
-        logger.warning('%s repository detected.', language)
-        files_to_return = []
-        # Read template file
-        from azext_aks_deploy.dev.resources.resourcefiles import DEPLOY_TO_AKS_TEMPLATE, DEPLOYMENT_MANIFEST, SERVICE_MANIFEST
-        
-        files_to_return.append(Files(path='manifests/service.yml',
-            content=SERVICE_MANIFEST
-                .replace(APP_NAME_PLACEHOLDER, APP_NAME_DEFAULT)
-                .replace(PORT_NUMBER_PLACEHOLDER, PORT_NUMBER_DEFAULT)))
-        files_to_return.append(Files(path='manifests/deployment.yml',
-            content=DEPLOYMENT_MANIFEST
-                .replace(APP_NAME_PLACEHOLDER, APP_NAME_DEFAULT)
-                .replace(ACR_PLACEHOLDER, acr_details['name'])
-                .replace(PORT_NUMBER_PLACEHOLDER, PORT_NUMBER_DEFAULT)))
-        files_to_return.append(Files(path='.github/workflows/main.yml',
-            content=DEPLOY_TO_AKS_TEMPLATE
-                .replace(APP_NAME_PLACEHOLDER, APP_NAME_DEFAULT)
-                .replace(ACR_PLACEHOLDER, acr_details['name'])
-                .replace(CLUSTER_PLACEHOLDER, cluster_details['name'])
-                .replace(RG_PLACEHOLDER, cluster_details['resourceGroup'])))
-        return files_to_return
-    else:
-        logger.debug('Languages detected : {} '.format(languages))
-        raise CLIError('The languages in this repository are not yet supported from up command.')
+def get_yaml_template_for_repo(language, cluster_details, acr_details, repo_name):
+    files_to_return = []
+    # Read template file
+    from azext_aks_deploy.dev.resources.resourcefiles import DEPLOY_TO_AKS_TEMPLATE
+    files_to_return.append(Files(path='.github/workflows/main.yml',
+        content=DEPLOY_TO_AKS_TEMPLATE
+            .replace(APP_NAME_PLACEHOLDER, APP_NAME_DEFAULT)
+            .replace(ACR_PLACEHOLDER, acr_details['name'])
+            .replace(CLUSTER_PLACEHOLDER, cluster_details['name'])
+            .replace(RELEASE_PLACEHOLDER, RELEASE_NAME)
+            .replace(RG_PLACEHOLDER, cluster_details['resourceGroup'])))
+    return files_to_return
+       
 
+def choose_supported_language(languages):
+    # check if top three languages are supported or not
+    list_languages = list(languages.keys())
+    first_language = list_languages[0]
+    if 'JavaScript' == first_language or 'Java' == first_language or 'Python' == first_language:
+        return first_language
+    elif len(list_languages) >= 1 and ( 'JavaScript' == list_languages[1] or 'Java' == list_languages[1] or 'Python' == list_languages[1]):
+        return list_languages[1]
+    elif len(list_languages) >= 2 and ( 'JavaScript' == list_languages[2] or 'Java' == list_languages[2] or 'Python' == list_languages[2]):
+        return list_languages[2]
+    return None
     
 def _get_repo_name_from_repo_url(repository_url):
     """
@@ -162,11 +187,4 @@ def _get_repo_name_from_repo_url(repository_url):
     raise CLIError('Could not parse repository url.')
 
 
-ACR_PLACEHOLDER = 'container_registry_name_place_holder'
-APP_NAME_PLACEHOLDER = 'app_name_place_holder'
-PORT_NUMBER_PLACEHOLDER = 'port_number_place_holder'
-CLUSTER_PLACEHOLDER = 'cluster_name_place_holder'
-RG_PLACEHOLDER = 'resource_name_place_holder'
 
-PORT_NUMBER_DEFAULT = '8080'
-APP_NAME_DEFAULT = 'k8sdemo'
