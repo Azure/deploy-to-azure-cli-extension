@@ -14,23 +14,23 @@ strategy:
       python.version: '3.6'
 
 steps:
-  - script: python3 -m pip install --upgrade pip
-    displayName: 'Upgrade pip'
-  
-  - script: python3 -m pip install wheel==0.30.0 
+  - script: python -m pip install --upgrade pip
+    displayName: 'Upgrade Pip'
+
+  - script: python -m pip install --user wheel==0.30.0
     displayName: 'Install Wheel'
   
-  - script: 'python3 -m pip install --upgrade .'
-    displayName: 'Pip upgrade'
+  - script: 'python -m pip install --user --upgrade .'
+    displayName: 'Pip Upgrade'
     workingDirectory: 'deploy-aks/'
-
-  - script: 'python3 ./setup.py bdist_wheel'
-    displayName: 'Build wheel for CLI extension'
+  
+  - script: 'python ./setup.py bdist_wheel'
+    displayName: 'Build wheel for CLI Extension'
     workingDirectory: 'deploy-aks/'
 
   - task: PublishBuildArtifacts@1
-    displayName: 'Publish Azure AKS deploy CLI extension as artifact'
+    displayName: 'Publish Azure AKS deploy CLI Extension as Artifact'
     inputs:
-      pathtoPublish: 'deploy-aks/dist' 
-      artifactName: 'deploy-aks-cli-extension' 
-      publishLocation: 'Container'
+     pathtoPublish: 'deploy-aks/dist' 
+     artifactName: 'deploy-aks-cli-extension'
+     publishLocation: Container
