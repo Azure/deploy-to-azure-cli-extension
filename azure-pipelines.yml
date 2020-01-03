@@ -14,17 +14,17 @@ strategy:
       python.version: '3.6'
 
 steps:
-  - script: python -m pip install --upgrade pip
+  - script: python3 -m pip install --upgrade pip
     displayName: 'Upgrade pip'
   
   - script: python3 -m pip install wheel==0.30.0 
     displayName: 'Install Wheel'
   
-  - script: 'python -m pip install --upgrade .'
+  - script: 'python3 -m pip install --upgrade .'
     displayName: 'Pip upgrade'
     workingDirectory: 'deploy-aks/'
 
-  - script: 'python ./setup.py bdist_wheel'
+  - script: 'python3 ./setup.py bdist_wheel'
     displayName: 'Build wheel for CLI extension'
     workingDirectory: 'deploy-aks/'
 
