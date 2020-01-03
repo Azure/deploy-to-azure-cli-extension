@@ -22,10 +22,10 @@ class Files:  # pylint: disable=too-few-public-methods
         self.content = content
 
 
-def get_github_pat_token(repo_name,display_warning=False):
+def get_github_pat_token(token_prefix,display_warning=False):
     from azext_aks_deploy.dev.common.github_credential_manager import GithubCredentialManager
     github_manager = GithubCredentialManager()
-    return github_manager.get_token(repo_name=repo_name,display_warning=display_warning)
+    return github_manager.get_token(token_prefix=token_prefix,display_warning=display_warning)
 
 
 def get_github_repos_api_url(repo_id):
