@@ -51,10 +51,10 @@ def delete_dir(path):
     shutil.rmtree(path)
 
 
-def datetime_now_as_string():
+def time_now_as_string():
     from datetime import datetime
-    now = datetime.utcnow().isoformat()
-    return ''.join(e for e in now if e.isalnum())
+    now = datetime.utcnow().strftime("%H%M%S")
+    return now
 
 
 def open_url(url):

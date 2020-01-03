@@ -44,8 +44,8 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, skip_secr
     repo_name = _get_repo_name_from_repo_url(repository)
 
     from azext_aks_deploy.dev.common.github_api_helper import get_languages_for_repo, push_files_github
-    get_github_pat_token(display_warning=True)
-    logger.warning('Setting up your workflow. This will require 1 or more files to be checkedin to the repository.')                                                           
+    get_github_pat_token(repo_name,display_warning=True)
+    logger.warning('Setting up your workflow.')                                                           
 
     languages = get_languages_for_repo(repo_name)
     if not languages:
@@ -66,6 +66,7 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, skip_secr
     logger.debug(cluster_details)
     acr_details = get_acr_details(acr)
     logger.debug(acr_details)
+    print('')
 
     if port is None:
         port = PORT_NUMBER_DEFAULT
@@ -78,16 +79,18 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, skip_secr
     else:
         logger.warning('Using the Dockerfile found in the repository {}'.format(repo_name))
 
-    # check in helm charts
-    helm_charts = get_helm_charts(language, acr_details, port)
-    if helm_charts:
-        push_files_github(helm_charts, repo_name, 'master', True, 
-                            message="Checking in helm charts for K8s deployment workflow.")
+    if 'Smarty' not in languages.keys():
+        # check in helm charts
+        helm_charts = get_helm_charts(language, acr_details, port)
+        if helm_charts:
+            push_files_github(helm_charts, repo_name, 'master', True, 
+                                message="Checking in helm charts for K8s deployment workflow.")
 
     # create azure service principal and display json on the screen for user to configure it as Github secrets
     if not skip_secrets_generation:
         get_azure_credentials()
-
+        
+    print('')
     files = get_yaml_template_for_repo(language, cluster_details, acr_details, repo_name)
     # File checkin
     for file_name in files:
@@ -95,17 +98,16 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, skip_secr
         logger.debug("Checkin file content: {}".format(file_name.content))
 
     workflow_commit_sha = push_files_github(files, repo_name, 'master', True, message="Setting up K8s deployment workflow.")
-    print('')
-    print('GitHub workflow is setup for continuous deployment.')
+    print('Creating workflow...')
     check_run_id = get_work_flow_check_runID(repo_name,workflow_commit_sha)
     workflow_url = 'https://github.com/{repo_id}/runs/{checkID}'.format(repo_id=repo_name,checkID=check_run_id)
-    print('For more details, check {}'.format(workflow_url))
-    print('')
+    print('GitHub Action workflow has been created - {}'.format(workflow_url))
+
     if not do_not_wait:
         poll_workflow_status(repo_name,check_run_id)
         configure_aks_credentials(cluster_details['name'],cluster_details['resourceGroup'])
         deployment_ip, port = get_deployment_IP_port(RELEASE_NAME,language)
-        print('Your app is deployed at :http://{ip}:{port}'.format(ip=deployment_ip,port=port))
+        print('Your app is deployed at: http://{ip}:{port}'.format(ip=deployment_ip,port=port))
     return
 
 
@@ -138,7 +140,6 @@ def poll_workflow_status(repo_name,check_run_id):
                     break
         colorama.deinit()
     print('GitHub workflow completed.')
-    print('')
     if check_run_conclusion == 'success':
         print('Workflow succeeded')
     else:

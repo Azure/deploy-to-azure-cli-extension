@@ -46,6 +46,7 @@ def get_helm_charts(language, acr_details, port):
         try:
             abs_pack_path = FILE_ABSOLUTE_PATH+language_packs_path
             # r=root, d=directories, f = files
+            logger.debug("Checking in helm charts")
             for r, d,f in os.walk(abs_pack_path):
                 if 'charts' in r:
                     for file in f:
@@ -54,6 +55,7 @@ def get_helm_charts(language, acr_details, port):
                             file_content = get_file_content(file_path)
                             # replace values in charts
                             if('values.yaml' in file_path):
+                                logger.debug("Replacing values in values.yaml")
                                 file_content = replace_values(file_content, acr_details)
                                 file_content = replace_port(file_content,port)
                             if file_path.startswith(abs_pack_path):

@@ -39,7 +39,7 @@ def get_aks_details(name=None):
         if name is not None:
             raise CLIError('Cluster with name {} could not be found. Please check using command az aks list.'.format(name))
         cluster_choice = prompt_user_friendly_choice_list(
-            "Which kubernetes cluster do you want to target for this pipeline?", cluster_choice_list)
+            "Which kubernetes cluster do you want to target?", cluster_choice_list)
         return aks_list[cluster_choice]
 
 
@@ -62,7 +62,7 @@ def get_acr_details(name=None):
         if name is not None:
             raise CLIError('Container Registry with name {} could not be found. Please check using command az acr list.'.format(name))
         registry_choice = prompt_user_friendly_choice_list(
-            "Which Azure Container Registry do you want to use for this pipeline?", registry_choice_list)
+            "Which Azure Container Registry do you want to use?", registry_choice_list)
         return acr_list[registry_choice]
 
 def configure_aks_credentials(cluster_name,resource_group):
@@ -71,6 +71,6 @@ def configure_aks_credentials(cluster_name,resource_group):
         import json
         subscription_id, subscription_name, tenant_id, environment_name = get_default_subscription_info()
         logger.warning("Using your default Azure subscription %s for getting AKS cluster credentials.", subscription_name)
-        aks_creds = subprocess.check_output('az aks get-credentials -n {} -g {} -o json'.format(cluster_name,resource_group), shell=True)
+        aks_creds = subprocess.check_output('az aks get-credentials -n {cluster_name} -g {group_name} -o json'.format(cluster_name=cluster_name,group_name=resource_group), shell=True)
     except Exception as ex:
         raise CLIError(ex)    
