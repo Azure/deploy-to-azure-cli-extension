@@ -8,7 +8,7 @@ import requests
 from knack.prompting import prompt, prompt_pass
 from knack.log import get_logger
 from knack.util import CLIError
-from azext_aks_deploy.dev.common.utils import datetime_now_as_string, singleton
+from azext_aks_deploy.dev.common.utils import time_now_as_string, singleton
 
 AKS_UP_GITHUB_PAT_ENVKEY = "GITHUB_PAT"
 
@@ -27,21 +27,20 @@ class GithubCredentialManager():
 
     def _create_token(self, repo_name, note=None):
         logger.warning('We need to create a Personal Access Token to communicate with GitHub. '
-                       'A new PAT with scopes (admin:repo_hook, repo, user) will be created.')
-        logger.warning('You can set the PAT in the environment variable (%s) to avoid getting prompted.',
+                       'A new PAT will be created with scopes - admin:repo_hook, repo, user.')
+        logger.warning('You can set the PAT in the environment variable (%s) to avoid getting prompted for username and password.',
                        AKS_UP_GITHUB_PAT_ENVKEY)
-        self.username = prompt(msg='Enter your GitHub username (leave blank for using already generated PAT): ')
         print('')
+        self.username = prompt(msg='Enter your GitHub username (leave blank for using already generated PAT): ')
         if not self.username:
             while not self.token:
                 self.token = prompt_pass(msg='Enter your GitHub PAT: ', help_string='Generate a Personal Access Token '
                                          'with approproate permissions from GitHub Developer settings and paste here.')
             print('')
             return
-        self.password = prompt_pass(msg='Enter your GitHub password: ', confirm=True)
-        print('')
+        self.password = prompt_pass(msg='Enter your GitHub password: ')
         if not note:
-            note = repo_name + "_AksUpCLIExtensionToken_" + datetime_now_as_string()
+            note = repo_name + "_AksUpCLIExtensionToken_" + time_now_as_string()
         encoded_pass = base64.b64encode(self.username.encode('utf-8') + b':' + self.password.encode('utf-8'))
         basic_auth = 'basic ' + encoded_pass.decode("utf-8")
         request_body = {
@@ -70,9 +69,10 @@ class GithubCredentialManager():
         import json
         response_json = json.loads(response.content)
         if response.status_code == 200 or response.status_code == 201:
-            logger.warning('Created new personal access token with scopes - admin:repo_hook, repo, user. Name: %s '
-                           'You can revoke this from your GitHub settings if the pipeline is no longer required.',
-                           note)
+            logger.warning('Created new personal access token with scopes - admin:repo_hook, repo, user.')
+            logger.warning('Name: %s', note)
+            logger.warning('You can revoke this from your GitHub settings if the pipeline is no longer required.')
+            print('')
             self.token = response_json['token']
         else:
             raise CLIError('Could not create a Personal Access Token for GitHub. Check your credentials and try again.')
@@ -87,6 +87,7 @@ class GithubCredentialManager():
         if github_pat:
             if display_warning:
                 logger.warning('Using GitHub PAT token found in environment variable (%s).', AKS_UP_GITHUB_PAT_ENVKEY)
+                print('')
             return github_pat
         if not self.token:
             self._create_token(repo_name=repo_name,note=note)

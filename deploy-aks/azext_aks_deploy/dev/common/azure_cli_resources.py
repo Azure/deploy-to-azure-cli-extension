@@ -39,7 +39,7 @@ def get_aks_details(name=None):
         if name is not None:
             raise CLIError('Cluster with name {} could not be found. Please check using command az aks list.'.format(name))
         cluster_choice = prompt_user_friendly_choice_list(
-            "Which kubernetes cluster do you want to target for this pipeline?", cluster_choice_list)
+            "Which kubernetes cluster do you want to target?", cluster_choice_list)
         return aks_list[cluster_choice]
 
 
@@ -62,7 +62,7 @@ def get_acr_details(name=None):
         if name is not None:
             raise CLIError('Container Registry with name {} could not be found. Please check using command az acr list.'.format(name))
         registry_choice = prompt_user_friendly_choice_list(
-            "Which Azure Container Registry do you want to use for this pipeline?", registry_choice_list)
+            "Which Azure Container Registry do you want to use?", registry_choice_list)
         return acr_list[registry_choice]
 
 def configure_aks_credentials(cluster_name,resource_group):
