@@ -19,6 +19,7 @@ steps:
   
   - script: python -m pip install wheel==0.30.0
     displayName: 'Install Wheel'
+    workingDirectory: 'deploy-aks/'
   
   - script: 'python -m pip install --upgrade .'
     displayName: 'Pip upgrade'
