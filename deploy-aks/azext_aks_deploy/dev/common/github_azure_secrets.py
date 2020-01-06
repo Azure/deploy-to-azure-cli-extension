@@ -20,10 +20,10 @@ def get_azure_credentials():
     print('You need to include the following key value pairs as part of your Secrets in the GitHub Repo Setting.')
     while azure_creds_user_choice == 1:
         print('Please go to your GitHub Repo page -> Settings -> Secrets -> Add a new secret and include the following Name and value pairs.')
-        print('')
-        print('Name: AZURE_CREDENTIALS')
         auth_details = subprocess.check_output('az ad sp create-for-rbac --sdk-auth -o json', shell=True)
         auth_details_json = json.loads(auth_details)
+        print('')
+        print('Name: AZURE_CREDENTIALS')
         print('Value:')
         print(json.dumps(auth_details_json, indent=2))
         print('')
