@@ -31,7 +31,7 @@ steps:
   - task: PowerShell@2
     displayName: 'Style Check'
     inputs:
-      filePath: '''scripts/runStyleCheck.ps1'''
+      filePath: 'scripts/runStyleCheck.ps1'
       errorActionPreference: 'continue'
 
   - task: PublishBuildArtifacts@1
