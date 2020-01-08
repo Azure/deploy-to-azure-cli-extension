@@ -4,8 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core import AzCommandsLoader
-from knack.events import EVENT_INVOKER_POST_PARSE_ARGS
-
 
 class DevCommandsLoader(AzCommandsLoader):
 
