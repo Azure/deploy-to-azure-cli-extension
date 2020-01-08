@@ -17,12 +17,15 @@ class DevCommandsLoader(AzCommandsLoader):
 
     def load_command_table(self, args):
         from azext_aks_deploy.dev.aks.commands import load_aks_commands
+        from azext_aks_deploy.dev.functionapp.commands import load_functionapp_commands
         load_aks_commands(self, args)
+        load_functionapp_commands(self, args)
         return self.command_table
 
     def load_arguments(self, command):
         from azext_aks_deploy.dev.aks.arguments import load_aks_arguments
+        from azext_aks_deploy.dev.functionapp.arguments import load_functionapp_arguments
         load_aks_arguments(self, command)
-
+        load_functionapp_arguments(self, command)
 
 COMMAND_LOADER_CLS = DevCommandsLoader

@@ -3,12 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.help_files import helps
+from azure.cli.core.commands import CliCommandType
 
+functionappops = CliCommandType(
+    operations_tmpl='azext_aks_deploy.dev.functionapp.up#{}'
+)
 
-def load_aks_help():
-    helps['aks up'] = """
-    type: command
-    short-summary: Deploy to AKS via GitHub actions.
-    long-summary:
-    """
+def load_functionapp_commands(self, _):
+    with self.command_group('functionapp', command_type=functionappops) as g:
+        g.command('up', 'functionapp_deploy')

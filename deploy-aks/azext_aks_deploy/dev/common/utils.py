@@ -101,3 +101,20 @@ def _read_file_content_ver2(file_path, encoding):
     logger.debug('inside read_file_content_ver2')
     with open(file_path) as f:
         return f.read().decode(encoding)
+
+
+def get_repo_name_from_repo_url(repository_url):
+    """
+    Should be called with a valid github url
+    returns owner/reponame for github repos, repo_name for azure repo type
+    """
+    from .git import  uri_parse
+    parsed_url = uri_parse(repository_url)
+    logger.debug('Parsing GitHub url: %s', parsed_url)
+    if parsed_url.scheme == 'https' and parsed_url.netloc == 'github.com':
+        logger.debug('Parsing path in the url to find repo id.')
+        stripped_path = parsed_url.path.strip('/')
+        if stripped_path.endswith('.git'):
+            stripped_path = stripped_path[:-4]
+        return stripped_path
+    raise CLIError('Could not parse repository url.')

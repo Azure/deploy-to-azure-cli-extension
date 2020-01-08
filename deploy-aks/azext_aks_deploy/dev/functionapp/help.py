@@ -6,9 +6,9 @@
 from knack.help_files import helps
 
 
-def load_aks_help():
-    helps['aks up'] = """
+def load_functionapp_help():
+    helps['functionapp up'] = """
     type: command
-    short-summary: Deploy to AKS via GitHub actions.
+    short-summary: Deploy to Functionapp via GitHub actions.
     long-summary:
     """

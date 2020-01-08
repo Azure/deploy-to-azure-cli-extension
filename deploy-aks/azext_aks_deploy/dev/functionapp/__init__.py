@@ -2,13 +2,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import pkg_resources
+from .help import load_functionapp_help
 
-from knack.help_files import helps
+pkg_resources.declare_namespace(__name__)
 
-
-def load_aks_help():
-    helps['aks up'] = """
-    type: command
-    short-summary: Deploy to AKS via GitHub actions.
-    long-summary:
-    """
+load_functionapp_help()

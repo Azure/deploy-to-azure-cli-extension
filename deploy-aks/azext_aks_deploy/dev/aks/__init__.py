@@ -3,8 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import pkg_resources
-from ._help import load_admin_help
+from ._help import load_aks_help
 
 pkg_resources.declare_namespace(__name__)
 
-load_admin_help()
+load_aks_help()

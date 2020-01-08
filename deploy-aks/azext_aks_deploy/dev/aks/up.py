@@ -8,12 +8,15 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from azext_aks_deploy.dev.common.git import get_repository_url_from_local_repo, uri_parse
-from azext_aks_deploy.dev.common.github_api_helper import (Files, get_work_flow_check_runID ,
-                                                     get_check_run_status_and_conclusion ,get_github_pat_token,
-                                                     push_files_github,
-                                                     get_default_branch,
-                                                     check_file_exists)
+from azext_aks_deploy.dev.common.github_api_helper import (Files, get_work_flow_check_runID,
+                                                           get_check_run_status_and_conclusion,
+                                                           get_github_pat_token,
+                                                           push_files_github,
+                                                           get_default_branch,
+                                                           check_file_exists)
+from azext_aks_deploy.dev.common.github_workflow_helper import poll_workflow_status
 from azext_aks_deploy.dev.common.github_azure_secrets import get_azure_credentials
+from azext_aks_deploy.dev.common.utils import get_repo_name_from_repo_url
 from azext_aks_deploy.dev.common.kubectl import get_deployment_IP_port
 from azext_aks_deploy.dev.common.const import ( APP_NAME_DEFAULT, APP_NAME_PLACEHOLDER,
                                                 ACR_PLACEHOLDER, RG_PLACEHOLDER, PORT_NUMBER_DEFAULT,
@@ -47,7 +50,7 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
         repository = prompt('GitHub Repository url (e.g. https://github.com/atbagga/aks-deploy):')
     if not repository:
         raise CLIError('The following arguments are required: --repository.')
-    repo_name = _get_repo_name_from_repo_url(repository)
+    repo_name = get_repo_name_from_repo_url(repository)
 
     from azext_aks_deploy.dev.common.github_api_helper import get_languages_for_repo, push_files_github
     get_github_pat_token(repo_name,display_warning=True)
@@ -121,41 +124,6 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
     return
 
 
-def poll_workflow_status(repo_name,check_run_id):
-    import colorama
-    import humanfriendly
-    import time
-    check_run_status = None
-    check_run_status, check_run_conclusion= get_check_run_status_and_conclusion(repo_name, check_run_id)
-    if check_run_status == 'queued':
-        # When workflow status is Queued
-        colorama.init()
-        with humanfriendly.Spinner(label="Workflow is in queue") as spinner:
-            while True:
-                spinner.step()
-                time.sleep(0.5)
-                check_run_status, check_run_conclusion = get_check_run_status_and_conclusion(repo_name, check_run_id)
-                if check_run_status == 'in_progress' or check_run_status == 'completed':
-                    break
-        colorama.deinit()
-    if check_run_status == 'in_progress':
-        # When workflow status is inprogress
-        colorama.init()
-        with humanfriendly.Spinner(label="Workflow is in progress") as spinner:
-            while True:
-                spinner.step()
-                time.sleep(0.5)
-                check_run_status, check_run_conclusion = get_check_run_status_and_conclusion(repo_name, check_run_id)
-                if check_run_status == 'completed':
-                    break
-        colorama.deinit()
-    print('GitHub workflow completed.')
-    if check_run_conclusion == 'success':
-        print('Workflow succeeded')
-    else:
-        raise CLIError('Workflow status: {}'.format(check_run_conclusion))
-
-
 def get_yaml_template_for_repo(language, cluster_details, acr_details, repo_name):
     files_to_return = []
     github_workflow_path = '.github/workflows/'
@@ -203,21 +171,6 @@ def choose_supported_language(languages):
     elif len(list_languages) >= 2 and ( 'JavaScript' == list_languages[2] or 'Java' == list_languages[2] or 'Python' == list_languages[2]):
         return list_languages[2]
     return None
-    
-def _get_repo_name_from_repo_url(repository_url):
-    """
-    Should be called with a valid github or azure repo url
-    returns owner/reponame for github repos, repo_name for azure repo type
-    """
-    parsed_url = uri_parse(repository_url)
-    logger.debug('Parsing GitHub url: %s', parsed_url)
-    if parsed_url.scheme == 'https' and parsed_url.netloc == 'github.com':
-        logger.debug('Parsing path in the url to find repo id.')
-        stripped_path = parsed_url.path.strip('/')
-        if stripped_path.endswith('.git'):
-            stripped_path = stripped_path[:-4]
-        return stripped_path
-    raise CLIError('Could not parse repository url.')
 
 
 
