@@ -28,6 +28,12 @@ steps:
     displayName: 'Build wheel for CLI Extension'
     workingDirectory: 'deploy-aks/'
 
+  - task: PowerShell@2
+    displayName: 'Style Check'
+    inputs:
+      filePath: '''scripts/runStyleCheck.ps1'''
+      errorActionPreference: 'continue'
+
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Azure AKS deploy CLI Extension as Artifact'
     inputs:
