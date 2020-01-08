@@ -1,10 +1,10 @@
 $failure = $false             
 
 Write-Output "Installing pylint"
-python -m pip install pylint
+python -m pip install --user pylint
 
 Write-Output "Installing flake8"
-python -m pip install flake8
+python -m pip install --user flake8
 
 Write-Output "Running pylint on all source"
 pylint --rcfile pylintrc ./deploy-aks/azext_aks_deploy -f colorized
