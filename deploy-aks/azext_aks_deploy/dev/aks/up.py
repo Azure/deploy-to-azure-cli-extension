@@ -64,7 +64,7 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, skip_secr
                                                                  configure_aks_credentials)
     cluster_details = get_aks_details(aks_cluster)
     logger.debug(cluster_details)
-    acr_details = get_acr_details(acr)
+    acr_details = get_acr_details(cluster_details['resourceGroup'],acr)
     logger.debug(acr_details)
     print('')
 
