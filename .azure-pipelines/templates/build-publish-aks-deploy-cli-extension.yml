@@ -1,0 +1,15 @@
+steps:
+  - script: 'pip install --upgrade .'
+    displayName: 'Install AKS Deploy CLI extension'
+    workingDirectory: 'deploy-aks/'
+
+  - script: 'python setup.py sdist bdist_wheel'
+    displayName: 'Build wheel for AKS Deploy CLI extension'
+    workingDirectory: 'deply-aks/'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish AKS Deploy CLI extension as artifact'
+    inputs:
+      pathtoPublish: 'deploy-aks/dist' 
+      artifactName: 'aks-deploy-cli-extension' 
+      publishLocation: 'Container'

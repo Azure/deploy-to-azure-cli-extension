@@ -1,0 +1,51 @@
+# Python package
+# Create and test a Python package on multiple Python versions.
+# Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/python
+
+trigger:
+- master
+
+pr: none
+
+jobs:
+
+
+- job: 'Build_Publish_AKS_Deploy_CLI_Extension'
+  pool:
+    vmImage: 'Ubuntu-16.04'
+
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.x'
+      architecture: 'x64'
+
+  - template: templates/setup-ci-machine.yml
+
+  - template: templates/build-publish-aks-deploy-cli-extension.yml
+
+- job: 'Run_Style_Check'
+  pool:
+    vmImage: 'macOS-10.13'
+
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.x'
+      architecture: 'x64'
+
+  - template: templates/install-azure-cli-edge.yml
+
+  - template: templates/download-install-local-azure-test-sdk.yml
+
+  - template: templates/setup-ci-machine.yml
+
+  - template: templates/download-install-local-aks-deploy-cli-extension-with-pip.yml
+
+  - task: PowerShell@2
+    displayName: 'Run Style Check'
+    inputs:
+      targetType: 'filePath'
+      filePath: 'scripts/runStyleCheck.ps1'
+
