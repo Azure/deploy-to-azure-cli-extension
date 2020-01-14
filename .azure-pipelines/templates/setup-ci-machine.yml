@@ -1,6 +1,8 @@
 steps:
 - script: python -m pip install --upgrade pip
   displayName: 'Upgrade pip'
+- script: pip fix-user-path
+  displayName: 'Fix to add user directory to python path'
 - script: pip install wheel==0.30.0
   displayName: 'Install Wheel'
 - script: pip install pytest==4.6.6
