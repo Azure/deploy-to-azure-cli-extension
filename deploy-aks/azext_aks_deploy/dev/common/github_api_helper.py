@@ -32,19 +32,19 @@ def get_github_repos_api_url(repo_id):
     return 'https://api.github.com/repos/' + repo_id
 
 
-def push_files_github(files, repo_name, branch, commit_to_branch, message="Set up CI with Azure Pipelines"):
+def push_files_github(files, repo_name, branch, commit_to_branch, message="Set up CI with Azure Pipelines",branch_name=None):
     if commit_to_branch:
         return commit_files_to_github_branch(files, repo_name, branch, message)
-    # Commenting the PR flow for Docker and manifests checkin
     # Pull request flow
     # Create Branch
-    #new_branch = create_github_branch(repo=repo_name, source=branch)
-    # Commit files to branch
-    #commit_files_to_github_branch(files, repo_name, new_branch, message)
-    # Create PR from new branch
-    #pr = create_pr_github(branch, new_branch, repo_name, message)
-    #print('Created a Pull Request - {url}'.format(url=pr['url']))
-    #return new_branch
+    if branch_name:
+        new_branch = create_github_branch(repo=repo_name, source=branch)
+        # Commit files to branch
+        commit_files_to_github_branch(files, repo_name, new_branch, message)
+        # Create PR from new branch
+        pr = create_pr_github(branch, new_branch, repo_name, message)
+        print('Created a Pull Request - {url}'.format(url=pr['url']))
+        return new_branch
 
 
 def create_pr_github(branch, new_branch, repo_name, message):

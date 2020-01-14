@@ -9,17 +9,19 @@ from knack.util import CLIError
 
 from azext_aks_deploy.dev.common.git import get_repository_url_from_local_repo, uri_parse
 from azext_aks_deploy.dev.common.github_api_helper import (Files, get_work_flow_check_runID ,
-                                                     get_check_run_status_and_conclusion ,get_github_pat_token)
+                                                     get_check_run_status_and_conclusion ,get_github_pat_token,
+                                                     push_files_github)
 from azext_aks_deploy.dev.common.github_azure_secrets import get_azure_credentials
 from azext_aks_deploy.dev.common.kubectl import get_deployment_IP_port
 from azext_aks_deploy.dev.common.const import ( APP_NAME_DEFAULT, APP_NAME_PLACEHOLDER,
                                                 ACR_PLACEHOLDER, RG_PLACEHOLDER, PORT_NUMBER_DEFAULT,
                                                 CLUSTER_PLACEHOLDER, RELEASE_PLACEHOLDER, RELEASE_NAME)
+from azext_aks_deploy.dev.common.prompting import prompt_user_friendly_choice_list
 from azext_aks_deploy.dev.aks.docker_helm_template import get_docker_templates,get_helm_charts
 
 logger = get_logger(__name__)
 
-def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, skip_secrets_generation=False, do_not_wait=False):
+def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_name=None, skip_secrets_generation=False, do_not_wait=False):
     """Build and Deploy to AKS via GitHub actions
     :param aks_cluster: Name of the cluster to select for deployment.
     :type aks_cluster: str
@@ -29,6 +31,8 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, skip_secr
     :type repository: str
     :param port: Port on which your application runs. Default is 8080
     :type port:str
+    :param branch_name: New branch name to be created for checking files and raise a PR
+    :type branch_name:str
     :param skip_secrets_generation : Flag to skip generating Azure credentials.
     :type skip_secrets_generation: bool
     :param do_not_wait : Do not wait for workflow completion.
@@ -68,14 +72,14 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, skip_secr
     logger.debug(acr_details)
     print('')
 
+    files = []
     if port is None:
         port = PORT_NUMBER_DEFAULT
     if 'Dockerfile' not in languages.keys():
         # check in docker file and docker ignore  
         docker_files = get_docker_templates(language, port)
         if docker_files:
-            push_files_github(docker_files, repo_name, 'master', True, 
-                            message="Checking in docker files for K8s deployment workflow.")
+            files = files + docker_files
     else:
         logger.warning('Using the Dockerfile found in the repository {}'.format(repo_name))
 
@@ -83,15 +87,17 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, skip_secr
         # check in helm charts
         helm_charts = get_helm_charts(language, acr_details, port)
         if helm_charts:
-            push_files_github(helm_charts, repo_name, 'master', True, 
-                                message="Checking in helm charts for K8s deployment workflow.")
+            files = files + helm_charts
 
     # create azure service principal and display json on the screen for user to configure it as Github secrets
     if not skip_secrets_generation:
         get_azure_credentials()
         
     print('')
-    files = get_yaml_template_for_repo(language, cluster_details, acr_details, repo_name)
+    workflow_files = get_yaml_template_for_repo(language, cluster_details, acr_details, repo_name)
+    if workflow_files:
+        files = files + workflow_files
+
     # File checkin
     for file_name in files:
         logger.debug("Checkin file path: {}".format(file_name.path))
@@ -158,7 +164,15 @@ def get_yaml_template_for_repo(language, cluster_details, acr_details, repo_name
             .replace(RELEASE_PLACEHOLDER, RELEASE_NAME)
             .replace(RG_PLACEHOLDER, cluster_details['resourceGroup'])))
     return files_to_return
-       
+
+def push_files_to_repository(repo_name, branch, files):
+    commit_strategy_choice_list = ['Commit directly to the {branch} branch.'.format(branch=branch),
+                                   'Create a new branch for this commit and start a pull request.']
+    commit_choice = prompt_user_friendly_choice_list("How do you want to commit the files to the repository?",
+                                                     commit_strategy_choice_list)
+    commit_direct_to_branch = commit_choice == 0
+    return push_files_github(files, repo_name, branch, commit_direct_to_branch)
+  
 
 def choose_supported_language(languages):
     # check if top three languages are supported or not
