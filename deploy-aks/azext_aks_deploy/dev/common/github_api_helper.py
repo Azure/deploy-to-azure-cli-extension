@@ -32,19 +32,17 @@ def get_github_repos_api_url(repo_id):
     return 'https://api.github.com/repos/' + repo_id
 
 
-def push_files_github(files, repo_name, branch, commit_to_branch, message="Set up CI with Azure Pipelines",branch_name=None):
+def push_files_github(files, repo_name, branch, commit_to_branch, message="Setting up K8s deployment workflow",branch_name=None):
     if commit_to_branch:
         return commit_files_to_github_branch(files, repo_name, branch, message)
     # Pull request flow
     # Create Branch
-    if branch_name:
-        new_branch = create_github_branch(repo=repo_name, source=branch)
-        # Commit files to branch
-        commit_files_to_github_branch(files, repo_name, new_branch, message)
-        # Create PR from new branch
-        pr = create_pr_github(branch, new_branch, repo_name, message)
-        print('Created a Pull Request - {url}'.format(url=pr['url']))
-        return new_branch
+    branch_name = create_github_branch(repo=repo_name, source=branch, new_branch=branch_name)
+    # Commit files to branch
+    commit_files_to_github_branch(files, repo_name, branch_name, message)
+    # Create PR from new branch
+    pr = create_pr_github(branch, branch_name, repo_name, message)
+    print('Created a Pull Request - {url}'.format(url=pr['url']))
 
 
 def create_pr_github(branch, new_branch, repo_name, message):
@@ -66,13 +64,19 @@ def create_pr_github(branch, new_branch, repo_name, message):
     return json.loads(create_response.text)
 
 
-def create_github_branch(repo, source):
+def create_github_branch(repo, source, new_branch=None):
     """
     API Documentation - https://developer.github.com/v3/git/refs/#create-a-reference
     """
     token = get_github_pat_token(repo)
     # Validate new branch name is valid
     branch_is_valid = False
+    if new_branch:
+        ref, is_folder = get_github_branch(repo, new_branch)
+        if not ref and not is_folder:
+            branch_is_valid = True
+        else:
+            logger.warning('Not a valid branch name.')
     while not branch_is_valid:
         new_branch = prompt_not_empty(msg='Enter new branch name to create: ')
         ref, is_folder = get_github_branch(repo, new_branch)

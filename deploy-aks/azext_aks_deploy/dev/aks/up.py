@@ -105,17 +105,18 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
         logger.debug("Checkin file content: {}".format(file_name.content))
 
     default_branch = get_default_branch(repo_name)
-    workflow_commit_sha = push_files_github(files, repo_name, default_branch, True, message="Setting up K8s deployment workflow.")
-    print('Creating workflow...')
-    check_run_id = get_work_flow_check_runID(repo_name,workflow_commit_sha)
-    workflow_url = 'https://github.com/{repo_id}/runs/{checkID}'.format(repo_id=repo_name,checkID=check_run_id)
-    print('GitHub Action workflow has been created - {}'.format(workflow_url))
+    workflow_commit_sha = push_files_to_repository(repo_name,default_branch,files,branch_name)
+    if workflow_commit_sha:
+        print('Creating workflow...')
+        check_run_id = get_work_flow_check_runID(repo_name,workflow_commit_sha)
+        workflow_url = 'https://github.com/{repo_id}/runs/{checkID}'.format(repo_id=repo_name,checkID=check_run_id)
+        print('GitHub Action workflow has been created - {}'.format(workflow_url))
 
-    if not do_not_wait:
-        poll_workflow_status(repo_name,check_run_id)
-        configure_aks_credentials(cluster_details['name'],cluster_details['resourceGroup'])
-        deployment_ip, port = get_deployment_IP_port(RELEASE_NAME,language)
-        print('Your app is deployed at: http://{ip}:{port}'.format(ip=deployment_ip,port=port))
+        if not do_not_wait:
+            poll_workflow_status(repo_name,check_run_id)
+            configure_aks_credentials(cluster_details['name'],cluster_details['resourceGroup'])
+            deployment_ip, port = get_deployment_IP_port(RELEASE_NAME,language)
+            print('Your app is deployed at: http://{ip}:{port}'.format(ip=deployment_ip,port=port))
     return
 
 
@@ -167,13 +168,15 @@ def get_yaml_template_for_repo(language, cluster_details, acr_details, repo_name
             .replace(RG_PLACEHOLDER, cluster_details['resourceGroup'])))
     return files_to_return
 
-def push_files_to_repository(repo_name, branch, files):
-    commit_strategy_choice_list = ['Commit directly to the {branch} branch.'.format(branch=branch),
-                                   'Create a new branch for this commit and start a pull request.']
-    commit_choice = prompt_user_friendly_choice_list("How do you want to commit the files to the repository?",
+def push_files_to_repository(repo_name, default_branch, files,branch_name):
+    commit_direct_to_branch = 0
+    if not branch_name:
+        commit_strategy_choice_list = ['Commit directly to the {branch} branch.'.format(branch=default_branch),
+                                       'Create a new branch for this commit and start a pull request.']
+        commit_choice = prompt_user_friendly_choice_list("How do you want to commit the files to the repository?",
                                                      commit_strategy_choice_list)
-    commit_direct_to_branch = commit_choice == 0
-    return push_files_github(files, repo_name, branch, commit_direct_to_branch)
+        commit_direct_to_branch = commit_choice == 0
+    return push_files_github(files, repo_name, default_branch, commit_direct_to_branch, branch_name=branch_name)
   
 
 def choose_supported_language(languages):
