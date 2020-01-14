@@ -4,12 +4,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-def poll_workflow_status(repo_name,check_run_id):
+from knack.util import CLIError
+
+from azext_aks_deploy.dev.common.github_api_helper import get_check_run_status_and_conclusion
+
+def poll_workflow_status(repo_name, check_run_id):
     import colorama
     import humanfriendly
     import time
     check_run_status = None
-    check_run_status, check_run_conclusion= get_check_run_status_and_conclusion(repo_name, check_run_id)
+    check_run_status, check_run_conclusion = get_check_run_status_and_conclusion(repo_name, check_run_id)
     if check_run_status == 'queued':
         # When workflow status is Queued
         colorama.init()
