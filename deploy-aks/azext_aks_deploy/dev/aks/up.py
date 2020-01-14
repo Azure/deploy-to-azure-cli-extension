@@ -10,7 +10,8 @@ from knack.util import CLIError
 from azext_aks_deploy.dev.common.git import get_repository_url_from_local_repo, uri_parse
 from azext_aks_deploy.dev.common.github_api_helper import (Files, get_work_flow_check_runID ,
                                                      get_check_run_status_and_conclusion ,get_github_pat_token,
-                                                     push_files_github)
+                                                     push_files_github,
+                                                     get_default_branch)
 from azext_aks_deploy.dev.common.github_azure_secrets import get_azure_credentials
 from azext_aks_deploy.dev.common.kubectl import get_deployment_IP_port
 from azext_aks_deploy.dev.common.const import ( APP_NAME_DEFAULT, APP_NAME_PLACEHOLDER,
@@ -103,7 +104,8 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
         logger.debug("Checkin file path: {}".format(file_name.path))
         logger.debug("Checkin file content: {}".format(file_name.content))
 
-    workflow_commit_sha = push_files_github(files, repo_name, 'master', True, message="Setting up K8s deployment workflow.")
+    default_branch = get_default_branch(repo_name)
+    workflow_commit_sha = push_files_github(files, repo_name, default_branch, True, message="Setting up K8s deployment workflow.")
     print('Creating workflow...')
     check_run_id = get_work_flow_check_runID(repo_name,workflow_commit_sha)
     workflow_url = 'https://github.com/{repo_id}/runs/{checkID}'.format(repo_id=repo_name,checkID=check_run_id)

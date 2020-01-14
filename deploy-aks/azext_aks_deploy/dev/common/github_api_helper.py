@@ -128,6 +128,20 @@ def get_github_branch(repo, branch):
     raise CLIError('Cannot get branch ({branch})'.format(branch=branch))
 
 
+def get_default_branch(repo):
+    """
+    API Documentation - https://developer.github.com/v3/repos/#get
+    Returns default branch name
+    """
+    token = get_github_pat_token(repo)
+    try:
+        get_branch_url = 'https://api.github.com/repos/{repo}'.format(repo=repo)
+        get_response = requests.get(get_branch_url, auth=('', token))
+        repo_details = get_response.json()
+        return repo_details['default_branch']
+    except Exception as ex:
+        CLIError(ex)    
+
 def commit_files_to_github_branch(files, repo_name, branch, message):
     if files:
         for file in files:
