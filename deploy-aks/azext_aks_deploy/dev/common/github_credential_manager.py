@@ -15,7 +15,6 @@ AKS_UP_GITHUB_PAT_ENVKEY = "GITHUB_PAT"
 logger = get_logger(__name__)
 
 
-
 @singleton
 class GithubCredentialManager():
     """ GithubCredentialManager
@@ -90,5 +89,5 @@ class GithubCredentialManager():
                 print('')
             return github_pat
         if not self.token:
-            self._create_token(token_prefix=token_prefix,note=note)
+            self._create_token(token_prefix=token_prefix, note=note)
         return self.token

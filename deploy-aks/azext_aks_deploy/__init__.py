@@ -5,6 +5,7 @@
 
 from azure.cli.core import AzCommandsLoader
 
+
 class DevCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
@@ -25,5 +26,6 @@ class DevCommandsLoader(AzCommandsLoader):
         from azext_aks_deploy.dev.functionapp.arguments import load_functionapp_arguments
         load_aks_arguments(self, command)
         load_functionapp_arguments(self, command)
+
 
 COMMAND_LOADER_CLS = DevCommandsLoader

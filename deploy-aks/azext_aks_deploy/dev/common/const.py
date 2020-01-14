@@ -15,4 +15,3 @@ APP_NAME_DEFAULT = 'k8sdemo'
 RELEASE_NAME = 'aksupdemo'
 
 RELEASE_PLACEHOLDER = 'release_name_place_holder'
-

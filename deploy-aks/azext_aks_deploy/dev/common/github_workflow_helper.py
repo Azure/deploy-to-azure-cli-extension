@@ -8,6 +8,7 @@ from knack.util import CLIError
 
 from azext_aks_deploy.dev.common.github_api_helper import get_check_run_status_and_conclusion
 
+
 def poll_workflow_status(repo_name, check_run_id):
     import colorama
     import humanfriendly

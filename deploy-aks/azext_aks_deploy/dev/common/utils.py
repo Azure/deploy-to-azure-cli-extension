@@ -36,8 +36,6 @@ def open_file(filepath):
     Opens a file in the default editor for the file type and exits.
     """
     import subprocess
-    import platform
-    import os
     if platform.system() == 'Darwin':       # macOS
         subprocess.call(('open', filepath))
     elif platform.system() == 'Windows':    # Windows
@@ -62,6 +60,7 @@ def open_url(url):
     """
     from webbrowser import open_new
     open_new(url=url)
+
 
 # inspired from aks_preview
 def which(binary):
@@ -108,7 +107,7 @@ def get_repo_name_from_repo_url(repository_url):
     Should be called with a valid github url
     returns owner/reponame for github repos, repo_name for azure repo type
     """
-    from .git import  uri_parse
+    from .git import uri_parse
     parsed_url = uri_parse(repository_url)
     logger.debug('Parsing GitHub url: %s', parsed_url)
     if parsed_url.scheme == 'https' and parsed_url.netloc == 'github.com':

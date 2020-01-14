@@ -12,7 +12,7 @@ from azext_aks_deploy.dev.common.const import (APP_NAME_DEFAULT, APP_NAME_PLACEH
 from azext_aks_deploy.dev.common.github_api_helper import Files\
 
 logger = get_logger(__name__)
-PACKS_ROOT_STRING = os.path.sep+'resources'+os.path.sep+'packs'+os.path.sep
+PACKS_ROOT_STRING = os.path.sep + 'resources' + os.path.sep + 'packs' + os.path.sep
 FILE_ABSOLUTE_PATH = abspath(dirname(dirname(abspath(__file__))))
 
 
@@ -44,7 +44,7 @@ def get_helm_charts(language, acr_details, port):
     files = []
     if language_packs_path:
         try:
-            abs_pack_path = FILE_ABSOLUTE_PATH+language_packs_path
+            abs_pack_path = FILE_ABSOLUTE_PATH + language_packs_path
             # r=root, d=directories, f = files
             logger.debug("Checking in helm charts")
             for r, _d, f in os.walk(abs_pack_path):
@@ -77,13 +77,16 @@ def get_file_content(path):
     except Exception as ex:
         raise CLIError(ex)
 
+
 def replace_values(file_content, acr_details):
     content = file_content.replace(APP_NAME_PLACEHOLDER, APP_NAME_DEFAULT).replace(ACR_PLACEHOLDER, acr_details['name'])
     return content
 
+
 def replace_port(file_content, port):
     content = file_content.replace(PORT_NUMBER_PLACEHOLDER, port)
     return content
+
 
 def get_supported_language_packs_path(language):
     return PACKS_ROOT_STRING + language.lower() + os.path.sep

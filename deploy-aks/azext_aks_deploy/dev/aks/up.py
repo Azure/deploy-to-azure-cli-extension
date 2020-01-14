@@ -7,7 +7,7 @@ from knack.prompting import prompt
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azext_aks_deploy.dev.common.git import get_repository_url_from_local_repo, uri_parse
+from azext_aks_deploy.dev.common.git import get_repository_url_from_local_repo
 from azext_aks_deploy.dev.common.github_api_helper import (Files, get_work_flow_check_runID,
                                                            get_check_run_status_and_conclusion,
                                                            get_github_pat_token,
@@ -45,7 +45,7 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
     """
     if repository is None:
         repository = get_repository_url_from_local_repo()
-        logger.debug('Github Remote url detected local repo is {}'.format(repository))
+        logger.debug('Github Remote url detected local repo is %s', repository)
     if not repository:
         repository = prompt('GitHub Repository url (e.g. https://github.com/atbagga/aks-deploy):')
     if not repository:
@@ -64,11 +64,10 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
     if language:
         logger.warning('%s repository detected.', language)
     else:
-        logger.debug('Languages detected : {} '.format(languages))
+        logger.debug('Languages detected : %s', languages)
         raise CLIError('The languages in this repository are not yet supported from up command.')
 
-    from azext_aks_deploy.dev.common.azure_cli_resources import (get_default_subscription_info,
-                                                                 get_aks_details,
+    from azext_aks_deploy.dev.common.azure_cli_resources import (get_aks_details,
                                                                  get_acr_details,
                                                                  configure_aks_credentials)
     cluster_details = get_aks_details(aks_cluster)
@@ -105,8 +104,8 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
 
     # File checkin
     for file_name in files:
-        logger.debug("Checkin file path: {}".format(file_name.path))
-        logger.debug("Checkin file content: {}".format(file_name.content))
+        logger.debug("Checkin file path: %s", file_name.path)
+        logger.debug("Checkin file content: %s", file_name.content)
 
     default_branch = get_default_branch(repo_name)
     workflow_commit_sha = push_files_to_repository(repo_name, default_branch, files, branch_name)
@@ -125,7 +124,7 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
     return
 
 
-def get_yaml_template_for_repo(language, cluster_details, acr_details, repo_name):
+def get_yaml_template_for_repo(cluster_details, acr_details):
     files_to_return = []
     github_workflow_path = '.github/workflows/'
     # Read template file
@@ -165,15 +164,13 @@ def get_new_workflow_yaml_name():
 
 
 def choose_supported_language(languages):
-    # check if top three languages are supported or not
+    # check if one of top three languages are supported or not
     list_languages = list(languages.keys())
     first_language = list_languages[0]
-    if 'JavaScript' == first_language or 'Java' == first_language or 'Python' == first_language:
+    if first_language in ('JavaScript', 'Java', 'Python'):
         return first_language
-    elif len(list_languages) >= 1 and ('JavaScript' == list_languages[1]
-                                        or 'Java' == list_languages[1] or 'Python' == list_languages[1]):
+    elif len(list_languages) >= 1 and list_languages[1] in ('JavaScript', 'Java', 'Python'):
         return list_languages[1]
-    elif len(list_languages) >= 2 and ('JavaScript' == list_languages[2]
-                                       or 'Java' == list_languages[2] or 'Python' == list_languages[2]):
+    elif len(list_languages) >= 2 and list_languages[2] in ('JavaScript', 'Java', 'Python'):
         return list_languages[2]
     return None

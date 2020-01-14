@@ -22,10 +22,10 @@ class Files:  # pylint: disable=too-few-public-methods
         self.content = content
 
 
-def get_github_pat_token(token_prefix,display_warning=False):
+def get_github_pat_token(token_prefix, display_warning=False):
     from azext_aks_deploy.dev.common.github_credential_manager import GithubCredentialManager
     github_manager = GithubCredentialManager()
-    return github_manager.get_token(token_prefix=token_prefix,display_warning=display_warning)
+    return github_manager.get_token(token_prefix=token_prefix, display_warning=display_warning)
 
 
 def get_github_repos_api_url(repo_id):
@@ -221,14 +221,16 @@ def get_languages_for_repo(repo_name):
     import json
     return json.loads(get_response.text)
 
-def get_check_runs_for_commit(repo_name,commmit_sha):
+
+def get_check_runs_for_commit(repo_name, commmit_sha):
     """
     API Documentation - https://developer.github.com/v3/checks/runs/#list-check-runs-for-a-specific-ref
     """
     token = get_github_pat_token(repo_name)
     headers = get_application_json_header_for_preview()
     time.sleep(1)
-    get_check_runs_url = 'https://api.github.com/repos/{repo_id}/commits/{ref}/check-runs'.format(repo_id=repo_name,ref=commmit_sha)
+    get_check_runs_url = 'https://api.github.com/repos/{repo_id}/commits/{ref}/check-runs'.format(
+        repo_id=repo_name, ref=commmit_sha)
     get_response = requests.get(url=get_check_runs_url, auth=('', token), headers=headers)
     if not get_response.status_code == _HTTP_SUCCESS_STATUS:
         raise CLIError('Get Check Runs failed. Error: ({err})'.format(err=get_response.reason))
@@ -236,11 +238,11 @@ def get_check_runs_for_commit(repo_name,commmit_sha):
     return json.loads(get_response.text)
 
 
-def get_work_flow_check_runID(repo_name,commmit_sha):
-    check_run_found= False
+def get_work_flow_check_runID(repo_name, commmit_sha):
+    check_run_found = False
     count = 0
-    while(not check_run_found or count>3):
-        check_runs_list_response = get_check_runs_for_commit(repo_name,commmit_sha)
+    while(not check_run_found or count > 3):
+        check_runs_list_response = get_check_runs_for_commit(repo_name, commmit_sha)
         if check_runs_list_response and check_runs_list_response['total_count'] > 0:
             # fetch the Github actions check run and its check run ID
             check_runs_list = check_runs_list_response['check_runs']
@@ -250,9 +252,9 @@ def get_work_flow_check_runID(repo_name,commmit_sha):
                     check_run_found = True
                     return check_run_id
         time.sleep(5)
-        count = count+1
+        count = count + 1
     raise CLIError("Couldn't find Github Actions check run. Please check 'Actions' tab in your Github repo.")
-    
+
 
 def get_check_run_status_and_conclusion(repo_name, check_run_id):
     """
@@ -260,10 +262,10 @@ def get_check_run_status_and_conclusion(repo_name, check_run_id):
     """
     token = get_github_pat_token(repo_name)
     headers = get_application_json_header_for_preview()
-    get_check_run_url = 'https://api.github.com/repos/{repo_id}/check-runs/{checkID}'.format(repo_id=repo_name,checkID=check_run_id)
+    get_check_run_url = 'https://api.github.com/repos/{repo_id}/check-runs/{checkID}'.format(
+        repo_id=repo_name, checkID=check_run_id)
     get_response = requests.get(url=get_check_run_url, auth=('', token), headers=headers)
     if not get_response.status_code == _HTTP_SUCCESS_STATUS:
         raise CLIError('Get Check Run failed. Error: ({err})'.format(err=get_response.reason))
     import json
     return json.loads(get_response.text)['status'], json.loads(get_response.text)['conclusion']
-    
