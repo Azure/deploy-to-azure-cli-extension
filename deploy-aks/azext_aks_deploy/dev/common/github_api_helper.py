@@ -155,6 +155,17 @@ def commit_files_to_github_branch(files, repo_name, branch, message):
     else:
         raise CLIError("No files to checkin.")
 
+def check_file_exists(repo_name, file_path):
+    """
+    API Documentation - https://developer.github.com/v3/repos/contents/#get-contents
+    """
+    token = get_github_pat_token(repo_name)
+    url_for_github_file_api = 'https://api.github.com/repos/{repo_name}/contents/{file_path}'.format(
+        repo_name=repo_name, file_path=file_path)
+    get_response = requests.get(url_for_github_file_api, auth=('', token))
+    if get_response.status_code == _HTTP_SUCCESS_STATUS:
+        return True
+    return False  
 
 def get_application_json_header():
     return {'Content-Type': 'application/json' + '; charset=utf-8',

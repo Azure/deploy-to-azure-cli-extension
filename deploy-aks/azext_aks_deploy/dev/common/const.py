@@ -13,7 +13,6 @@ RG_PLACEHOLDER = 'resource_name_place_holder'
 PORT_NUMBER_DEFAULT = '8080'
 APP_NAME_DEFAULT = 'k8sdemo'
 RELEASE_NAME = 'aksupdemo'
-RESOURCE_GROUP_NAME = 'az_aks_up_cli_extension_rg'
 
 RELEASE_PLACEHOLDER = 'release_name_place_holder'
 

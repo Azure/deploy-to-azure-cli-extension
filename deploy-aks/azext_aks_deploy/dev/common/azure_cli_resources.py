@@ -9,7 +9,6 @@ from knack.log import get_logger
 from knack.prompting import prompt
 from knack.util import CLIError
 from azext_aks_deploy.dev.common.prompting import prompt_user_friendly_choice_list
-from azext_aks_deploy.dev.common.const import RESOURCE_GROUP_NAME
 
 logger = get_logger(__name__)
 
@@ -29,14 +28,6 @@ def get_default_subscription_info():
     logger.debug('Your account does not have a default Azure subscription. Please run \'az login\' to setup account.')
     return None, None, None, None
 
-
-def create_resource_group(name, location):
-    subscription_id, subscription_name, tenant_id, environment_name = get_default_subscription_info()
-    logger.warning("Using your default Azure subscription %s for creating new resource group.", subscription_name)
-    rg_create = subprocess.check_output(('az group create --name {rg_name} --location {location} -o json').format(rg_name=name,location=location), shell=True)
-    rg_create_json = json.loads(rg_create)
-    logger.warning("Resource group created with name %s",name)
-    return rg_create_json['name']
     
 def create_aks_cluster(cluster_name,resource_group):
     subscription_id, subscription_name, tenant_id, environment_name = get_default_subscription_info()
@@ -58,19 +49,20 @@ def create_acr(registry_name,resource_group,sku):
     except Exception as ex:
         raise CLIError(ex)
 
-def get_location():
+def get_resource_group():
     subscription_id, subscription_name, tenant_id, environment_name = get_default_subscription_info()
-    logger.warning("Using your default Azure subscription %s for fetching locations.", subscription_name)
-    location_list = subprocess.check_output('az account list-locations -o json', shell=True)
-    location_list = json.loads(location_list)
-    if location_list:
-        location_choice = 0
-        location_choice_list = []
-        for location in location_list:
-            location_choice_list.append(location['name'])
-        location_choice = prompt_user_friendly_choice_list(
-            "In which location do you want to create your resources?", location_choice_list)
-        return location_list[location_choice]['name']
+    logger.warning("Using your default Azure subscription %s for fetching Resource Groups.", subscription_name)
+    group_list = subprocess.check_output('az group list -o json', shell=True)
+    group_list = json.loads(group_list)
+    if group_list:
+        group_choice = 0
+        group_choice_list = []
+        for group in group_list:
+            group_choice_list.append(group['name'])
+        group_choice = prompt_user_friendly_choice_list(
+            "In which resource group do you want to create your resources?", group_choice_list)
+        return group_list[group_choice]['name']
+
 
 def get_aks_details(name=None):
     subscription_id, subscription_name, tenant_id, environment_name = get_default_subscription_info()
@@ -93,10 +85,7 @@ def get_aks_details(name=None):
             "Which kubernetes cluster do you want to target?", cluster_choice_list)
         if cluster_choice == len(cluster_choice_list)-1:
             cluster_name = prompt('Please enter name of the cluster to be created: ')
-            resource_group = RESOURCE_GROUP_NAME
-            if not resource_group_exists(resource_group):
-                location = get_location()
-                create_resource_group(resource_group,location)
+            resource_group = get_resource_group()
             # check if cluster already exists
             for aks_cluster in aks_list:
                 if cluster_name.lower() == aks_cluster['name'].lower() and aks_cluster['resourceGroup']:
@@ -109,19 +98,7 @@ def get_aks_details(name=None):
         return cluster_details
 
 
-def resource_group_exists(name):
-    subscription_id, subscription_name, tenant_id, _environment_name = get_default_subscription_info()
-    logger.warning("Using your default Azure subscription %s for fetching Resource groups.",
-                   subscription_name)
-    try:
-        rg_list = subprocess.check_output('az group show -n {rg_name} -o json'.format(rg_name=name), shell=True)
-        logger.warning('Resource group already exists. Using resource group: {rg_name}'.format(rg_name=name))
-        return True
-    except BaseException as ex:
-        logger.debug(ex)
-        return False
-
-def get_acr_details(resource_group,name=None):
+def get_acr_details(name=None):
     subscription_id, subscription_name, tenant_id, _environment_name = get_default_subscription_info()
     logger.warning("Using your default Azure subscription %s for fetching Azure Container Registries.",
                    subscription_name)
@@ -149,6 +126,7 @@ def get_acr_details(resource_group,name=None):
                     acr_details = registry
             if not acr_details:
                 sku= get_sku()
+                resource_group = get_resource_group()
                 acr_details = create_acr(registry_name,resource_group,sku)
         else:
             acr_details = acr_list[registry_choice]
