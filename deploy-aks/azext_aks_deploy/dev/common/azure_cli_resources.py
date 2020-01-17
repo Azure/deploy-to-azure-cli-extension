@@ -132,6 +132,7 @@ def get_acr_details(name=None):
             acr_details = acr_list[registry_choice]
         return acr_details
 
+
 def get_sku():
     sku_list = ['Basic','Classic', 'Premium', 'Standard']
     sku_choice = prompt_user_friendly_choice_list(

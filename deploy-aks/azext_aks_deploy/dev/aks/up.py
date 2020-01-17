@@ -169,8 +169,8 @@ def choose_supported_language(languages):
     first_language = list_languages[0]
     if first_language in ('JavaScript', 'Java', 'Python'):
         return first_language
-    elif len(list_languages) >= 1 and list_languages[1] in ('JavaScript', 'Java', 'Python'):
+    if len(list_languages) >= 1 and list_languages[1] in ('JavaScript', 'Java', 'Python'):
         return list_languages[1]
-    elif len(list_languages) >= 2 and list_languages[2] in ('JavaScript', 'Java', 'Python'):
+    if len(list_languages) >= 2 and list_languages[2] in ('JavaScript', 'Java', 'Python'):
         return list_languages[2]
     return None

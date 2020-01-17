@@ -23,7 +23,7 @@ def poll_workflow_status(repo_name, check_run_id):
                 spinner.step()
                 time.sleep(0.5)
                 check_run_status, check_run_conclusion = get_check_run_status_and_conclusion(repo_name, check_run_id)
-                if check_run_status == 'in_progress' or check_run_status == 'completed':
+                if check_run_status in ('in_progress', 'completed'):
                     break
         colorama.deinit()
     if check_run_status == 'in_progress':

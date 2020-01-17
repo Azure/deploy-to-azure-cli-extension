@@ -3,9 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 try:
-    from urllib.parse import urlparse, quote
+    from urllib.parse import urlparse
 except ImportError:
-    from urllib import quote
     from urlparse import urlparse
 
 from knack.log import get_logger

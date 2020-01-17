@@ -60,7 +60,6 @@ def functionapp_deploy(repository=None, skip_secrets_generation=False, do_not_wa
 
     if not do_not_wait:
         poll_workflow_status(repo_name, check_run_id)
-    return
 
 
 def get_yaml_template_for_repo(_functionapp_name, _repo_name):
@@ -75,8 +74,8 @@ def choose_supported_language(languages):
     first_language = list_languages[0]
     if first_language in ('JavaScript', 'Java', 'Python'):
         return first_language
-    elif len(list_languages) >= 1 and list_languages[1] in ('JavaScript', 'Java', 'Python'):
+    if len(list_languages) >= 1 and list_languages[1] in ('JavaScript', 'Java', 'Python'):
         return list_languages[1]
-    elif len(list_languages) >= 2 and list_languages[2] in ('JavaScript', 'Java', 'Python'):
+    if len(list_languages) >= 2 and list_languages[2] in ('JavaScript', 'Java', 'Python'):
         return list_languages[2]
     return None

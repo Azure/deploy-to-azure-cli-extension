@@ -27,8 +27,8 @@ class GithubCredentialManager():
     def _create_token(self, token_prefix, note=None):
         logger.warning('We need to create a Personal Access Token to communicate with GitHub. '
                        'A new PAT will be created with scopes - admin:repo_hook, repo, user.')
-        logger.warning('You can set the PAT in the environment variable (%s) to avoid getting prompted for username and password.',
-                       AKS_UP_GITHUB_PAT_ENVKEY)
+        logger.warning('You can set the PAT in the environment variable (%s) to avoid getting prompted '
+                       'for username and password.', AKS_UP_GITHUB_PAT_ENVKEY)
         print('')
         self.username = prompt(msg='Enter your GitHub username (leave blank for using already generated PAT): ')
         if not self.username:

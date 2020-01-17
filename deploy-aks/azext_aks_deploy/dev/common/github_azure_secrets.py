@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.log import get_logger
-from knack.util import CLIError
 from azext_aks_deploy.dev.common.prompting import prompt_user_friendly_choice_list
 from azext_aks_deploy.dev.common.azure_cli_resources import get_default_subscription_info
 
@@ -14,7 +13,7 @@ logger = get_logger(__name__)
 def get_azure_credentials():
     import subprocess
     import json
-    subscription_id, subscription_name, tenant_id, environment_name = get_default_subscription_info()
+    _subscription_id, _subscription_name, _tenant_id, _environment_name = get_default_subscription_info()
     azure_creds_user_choice = 1
     print('')
     print('You need to include the following key value pairs as part of your Secrets in the GitHub Repo Setting.')
