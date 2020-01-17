@@ -32,19 +32,17 @@ def get_github_repos_api_url(repo_id):
     return 'https://api.github.com/repos/' + repo_id
 
 
-def push_files_github(files, repo_name, branch, commit_to_branch, message="Set up CI with Azure Pipelines"):
+def push_files_github(files, repo_name, branch, commit_to_branch, message="Setting up K8s deployment workflow",branch_name=None):
     if commit_to_branch:
         return commit_files_to_github_branch(files, repo_name, branch, message)
-    # Commenting the PR flow for Docker and manifests checkin
     # Pull request flow
     # Create Branch
-    #new_branch = create_github_branch(repo=repo_name, source=branch)
+    branch_name = create_github_branch(repo=repo_name, source=branch, new_branch=branch_name)
     # Commit files to branch
-    #commit_files_to_github_branch(files, repo_name, new_branch, message)
+    commit_files_to_github_branch(files, repo_name, branch_name, message)
     # Create PR from new branch
-    #pr = create_pr_github(branch, new_branch, repo_name, message)
-    #print('Created a Pull Request - {url}'.format(url=pr['url']))
-    #return new_branch
+    pr = create_pr_github(branch, branch_name, repo_name, message)
+    print('Created a Pull Request - {url}'.format(url=pr['url']))
 
 
 def create_pr_github(branch, new_branch, repo_name, message):
@@ -66,13 +64,19 @@ def create_pr_github(branch, new_branch, repo_name, message):
     return json.loads(create_response.text)
 
 
-def create_github_branch(repo, source):
+def create_github_branch(repo, source, new_branch=None):
     """
     API Documentation - https://developer.github.com/v3/git/refs/#create-a-reference
     """
     token = get_github_pat_token(repo)
     # Validate new branch name is valid
     branch_is_valid = False
+    if new_branch:
+        ref, is_folder = get_github_branch(repo, new_branch)
+        if not ref and not is_folder:
+            branch_is_valid = True
+        else:
+            logger.warning('Not a valid branch name.')
     while not branch_is_valid:
         new_branch = prompt_not_empty(msg='Enter new branch name to create: ')
         ref, is_folder = get_github_branch(repo, new_branch)
@@ -128,6 +132,20 @@ def get_github_branch(repo, branch):
     raise CLIError('Cannot get branch ({branch})'.format(branch=branch))
 
 
+def get_default_branch(repo):
+    """
+    API Documentation - https://developer.github.com/v3/repos/#get
+    Returns default branch name
+    """
+    token = get_github_pat_token(repo)
+    try:
+        get_branch_url = 'https://api.github.com/repos/{repo}'.format(repo=repo)
+        get_response = requests.get(get_branch_url, auth=('', token))
+        repo_details = get_response.json()
+        return repo_details['default_branch']
+    except Exception as ex:
+        CLIError(ex)    
+
 def commit_files_to_github_branch(files, repo_name, branch, message):
     if files:
         for file in files:
@@ -137,6 +155,17 @@ def commit_files_to_github_branch(files, repo_name, branch, message):
     else:
         raise CLIError("No files to checkin.")
 
+def check_file_exists(repo_name, file_path):
+    """
+    API Documentation - https://developer.github.com/v3/repos/contents/#get-contents
+    """
+    token = get_github_pat_token(repo_name)
+    url_for_github_file_api = 'https://api.github.com/repos/{repo_name}/contents/{file_path}'.format(
+        repo_name=repo_name, file_path=file_path)
+    get_response = requests.get(url_for_github_file_api, auth=('', token))
+    if get_response.status_code == _HTTP_SUCCESS_STATUS:
+        return True
+    return False  
 
 def get_application_json_header():
     return {'Content-Type': 'application/json' + '; charset=utf-8',
