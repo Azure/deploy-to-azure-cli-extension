@@ -183,28 +183,27 @@ def commit_file_to_github_branch(path_to_commit, content, repo_name, branch, mes
     headers = get_application_json_header()
     url_for_github_file_api = 'https://api.github.com/repos/{repo_name}/contents/{path_to_commit}'.format(
         repo_name=repo_name, path_to_commit=path_to_commit)
-    if path_to_commit and content:
-        path_to_commit = path_to_commit.strip('.')
-        path_to_commit = path_to_commit.strip('/')
-        encoded_content = base64.b64encode(content.encode('utf-8')).decode("utf-8")
-        request_body = {
-            "message": message,
-            "branch": branch,
-            "content": encoded_content
-        }
-        token = get_github_pat_token(repo_name)
-        logger.warning('Checking in file %s in the Github repository %s', path_to_commit, repo_name)
-        response = requests.put(url_for_github_file_api, auth=('', token),
-                                json=request_body, headers=headers)
-        logger.debug(response.text)
-        if not response.status_code == _HTTP_CREATED_STATUS:
-            raise CLIError('GitHub file checkin failed for file ({file}). Status Code ({code}).'.format(
-                file=path_to_commit, code=response.status_code))
-        commit_obj = response.json()['commit']
-        commit_sha = commit_obj['sha']
-        return commit_sha
-    else:
+    if not (path_to_commit and content):
         raise CLIError('GitHub file checkin failed. File path or content is empty.')
+    path_to_commit = path_to_commit.strip('.')
+    path_to_commit = path_to_commit.strip('/')
+    encoded_content = base64.b64encode(content.encode('utf-8')).decode("utf-8")
+    request_body = {
+        "message": message,
+        "branch": branch,
+        "content": encoded_content
+    }
+    token = get_github_pat_token(repo_name)
+    logger.warning('Checking in file %s in the Github repository %s', path_to_commit, repo_name)
+    response = requests.put(url_for_github_file_api, auth=('', token),
+                            json=request_body, headers=headers)
+    logger.debug(response.text)
+    if not response.status_code == _HTTP_CREATED_STATUS:
+        raise CLIError('GitHub file checkin failed for file ({file}). Status Code ({code}).'.format(
+            file=path_to_commit, code=response.status_code))
+    commit_obj = response.json()['commit']
+    commit_sha = commit_obj['sha']
+    return commit_sha
 
 
 def get_languages_for_repo(repo_name):
