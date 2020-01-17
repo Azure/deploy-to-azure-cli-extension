@@ -123,7 +123,6 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
             print('Your app is deployed at: http://{ip}:{port}'.format(ip=deployment_ip, port=port))
     return
 
-
 def get_yaml_template_for_repo(cluster_details, acr_details):
     files_to_return = []
     github_workflow_path = '.github/workflows/'

@@ -45,4 +45,3 @@ def get_azure_credentials():
         azure_creds_user_choice = prompt_user_friendly_choice_list(
             'Have you copied the name and value for AZURE_CREDENTIALS, REGISTRY_USERNAME and REGISTRY_PASSWORD:',
             user_choice_list)
-    return

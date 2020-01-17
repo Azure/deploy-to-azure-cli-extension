@@ -49,7 +49,7 @@ def get_helm_charts(language, acr_details, port):
         # r=root, d=directories, f = files
         logger.debug("Checking in helm charts")
         for r, _d, f in os.walk(abs_pack_path):
-            if not 'charts' in r:
+            if 'charts' not in r:
                 continue
             for file in f:
                 if '__pycache__' not in r and '__init__.py' not in file:

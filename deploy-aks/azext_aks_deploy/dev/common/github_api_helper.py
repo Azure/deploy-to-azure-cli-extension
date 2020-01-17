@@ -2,8 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import requests
 import time
+import requests
 from knack.log import get_logger
 from knack.util import CLIError
 from azext_aks_deploy.dev.common.prompting import prompt_not_empty
@@ -147,13 +147,12 @@ def get_default_branch(repo):
         CLIError(ex)    
 
 def commit_files_to_github_branch(files, repo_name, branch, message):
-    if files:
-        for file in files:
-            commit_sha = commit_file_to_github_branch(file.path, file.content, repo_name, branch, message)
-        # returning last commit sha
-        return commit_sha
-    else:
+    if not files:
         raise CLIError("No files to checkin.")
+    for file in files:
+        commit_sha = commit_file_to_github_branch(file.path, file.content, repo_name, branch, message)
+    # returning last commit sha
+    return commit_sha
 
 def check_file_exists(repo_name, file_path):
     """
@@ -201,10 +200,9 @@ def commit_file_to_github_branch(path_to_commit, content, repo_name, branch, mes
         if not response.status_code == _HTTP_CREATED_STATUS:
             raise CLIError('GitHub file checkin failed for file ({file}). Status Code ({code}).'.format(
                 file=path_to_commit, code=response.status_code))
-        else:
-            commit_obj = response.json()['commit']
-            commit_sha = commit_obj['sha']
-            return commit_sha
+        commit_obj = response.json()['commit']
+        commit_sha = commit_obj['sha']
+        return commit_sha
     else:
         raise CLIError('GitHub file checkin failed. File path or content is empty.')
 
