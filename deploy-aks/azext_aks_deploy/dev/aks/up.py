@@ -33,7 +33,7 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
     :type repository: str
     :param port: Port on which your application runs. Default is 8080
     :type port:str
-    :param branch_name: New branch name to be created for checking files and raise a PR
+    :param branch_name: New branch name to be created to check in files and raise a PR
     :type branch_name:str
     :param skip_secrets_generation : Skip generation of Azure credentials.
     :type skip_secrets_generation: bool
