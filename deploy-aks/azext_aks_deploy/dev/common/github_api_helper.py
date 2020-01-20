@@ -32,17 +32,23 @@ def get_github_repos_api_url(repo_id):
     return 'https://api.github.com/repos/' + repo_id
 
 
-def push_files_github(files, repo_name, branch, commit_to_branch, message="Setting up K8s deployment workflow",branch_name=None):
+def push_files_github(files, repo_name, branch, commit_to_branch,
+                      message="Setting up K8s deployment workflow", branch_name=None):
+    """ Push files to a Github branch or raise a PR to the branch depending on
+    commit_to_branch parameter.
+    return: If commit_to_branch is true, returns the commit sha else returns None
+    """
     if commit_to_branch:
         return commit_files_to_github_branch(files, repo_name, branch, message)
     # Pull request flow
-    # Create Branch
+    # 1. Create Branch
+    # 2. Commit files to branch
+    # 3. Create PR from new branch
     branch_name = create_github_branch(repo=repo_name, source=branch, new_branch=branch_name)
-    # Commit files to branch
     commit_files_to_github_branch(files, repo_name, branch_name, message)
-    # Create PR from new branch
     pr = create_pr_github(branch, branch_name, repo_name, message)
     print('Created a Pull Request - {url}'.format(url=pr['url']))
+    return None
 
 
 def create_pr_github(branch, new_branch, repo_name, message):
@@ -143,8 +149,9 @@ def get_default_branch(repo):
         get_response = requests.get(get_branch_url, auth=('', token))
         repo_details = get_response.json()
         return repo_details['default_branch']
-    except Exception as ex:
-        CLIError(ex)    
+    except BaseException as ex:  # pylint: disable=broad-except
+        CLIError(ex)
+
 
 def commit_files_to_github_branch(files, repo_name, branch, message):
     if not files:
@@ -153,6 +160,7 @@ def commit_files_to_github_branch(files, repo_name, branch, message):
         commit_sha = commit_file_to_github_branch(file.path, file.content, repo_name, branch, message)
     # returning last commit sha
     return commit_sha
+
 
 def check_file_exists(repo_name, file_path):
     """
@@ -164,7 +172,8 @@ def check_file_exists(repo_name, file_path):
     get_response = requests.get(url_for_github_file_api, auth=('', token))
     if get_response.status_code == _HTTP_SUCCESS_STATUS:
         return True
-    return False  
+    return False
+
 
 def get_application_json_header():
     return {'Content-Type': 'application/json' + '; charset=utf-8',

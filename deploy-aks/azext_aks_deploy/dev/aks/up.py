@@ -9,7 +9,7 @@ from knack.util import CLIError
 
 from azext_aks_deploy.dev.common.git import get_repository_url_from_local_repo
 from azext_aks_deploy.dev.common.github_api_helper import (Files, get_work_flow_check_runID,
-                                                           get_check_run_status_and_conclusion,
+                                                           get_languages_for_repo,
                                                            get_github_pat_token,
                                                            push_files_github,
                                                            get_default_branch,
@@ -26,7 +26,10 @@ from azext_aks_deploy.dev.aks.docker_helm_template import get_docker_templates, 
 
 logger = get_logger(__name__)
 
-def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_name=None, skip_secrets_generation=False, do_not_wait=False):
+
+# pylint: disable=too-many-statements
+def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_name=None,
+               skip_secrets_generation=False, do_not_wait=False):
     """Build and Deploy to AKS via GitHub actions
     :param aks_cluster: Name of the cluster to select for deployment.
     :type aks_cluster: str
@@ -52,13 +55,11 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
         raise CLIError('The following arguments are required: --repository.')
     repo_name = get_repo_name_from_repo_url(repository)
 
-    from azext_aks_deploy.dev.common.github_api_helper import get_languages_for_repo, push_files_github
     get_github_pat_token(repo_name, display_warning=True)
     logger.warning('Setting up your workflow.')
-
     languages = get_languages_for_repo(repo_name)
     if not languages:
-        raise CLIError('Language detection has failed on this repository.')
+        raise CLIError('Language detection failed for this repository.')
 
     language = choose_supported_language(languages)
     if language:
@@ -98,7 +99,7 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
         get_azure_credentials()
 
     print('')
-    workflow_files = get_yaml_template_for_repo(language, cluster_details, acr_details, repo_name)
+    workflow_files = get_yaml_template_for_repo(cluster_details, acr_details, repo_name)
     if workflow_files:
         files = files + workflow_files
 
@@ -118,17 +119,17 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
 
         if not do_not_wait:
             poll_workflow_status(repo_name, check_run_id)
-            configure_aks_credentials(cluster_details['name'],cluster_details['resourceGroup'])
+            configure_aks_credentials(cluster_details['name'], cluster_details['resourceGroup'])
             deployment_ip, port = get_deployment_IP_port(RELEASE_NAME, language)
             print('Your app is deployed at: http://{ip}:{port}'.format(ip=deployment_ip, port=port))
-    return
 
-def get_yaml_template_for_repo(cluster_details, acr_details):
+
+def get_yaml_template_for_repo(cluster_details, acr_details, repo_name):
     files_to_return = []
     github_workflow_path = '.github/workflows/'
     # Read template file
     yaml_file_name = 'main.yml'
-    workflow_yaml = github_workflow_path+yaml_file_name
+    workflow_yaml = github_workflow_path + yaml_file_name
     if check_file_exists(repo_name, workflow_yaml):
         yaml_file_name = get_new_workflow_yaml_name()
         workflow_yaml = github_workflow_path + yaml_file_name
@@ -157,8 +158,8 @@ def push_files_to_repository(repo_name, default_branch, files, branch_name):
 def get_new_workflow_yaml_name():
     logger.warning('A yaml file main.yml already exists in the .github/workflows folder.')
     new_workflow_yml_name = prompt_not_empty(
-                msg='Enter a new name for workflow yml file: ',
-                help_string='e.g. /new_main.yml to add in the .github/workflows folder.')
+        msg='Enter a new name for workflow yml file: ',
+        help_string='e.g. /new_main.yml to add in the .github/workflows folder.')
     return new_workflow_yml_name
 
 

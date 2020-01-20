@@ -1,13 +1,13 @@
 $failure = $false             
 
 Write-Output "Installing pylint"
-python3 -m pip install --user pylint
+python -m pip install --user pylint
 
 Write-Output "Installing flake8"
-python3 -m pip install --user flake8
+python -m pip install --user flake8
 
 Write-Output "Running pylint on all source"
-python3 -m pylint --rcfile pylintrc ./deploy-aks/azext_aks_deploy -f colorized
+python -m pylint --rcfile pylintrc ./deploy-aks/azext_aks_deploy -f colorized
 
 if ($LastExitCode -ne 0) {
     $failure = $true
@@ -17,7 +17,7 @@ if ($LastExitCode -ne 0) {
   }
 
 Write-Output "Running flake8 checks"
-python3 -m  flake8 --config .flake8
+python -m  flake8 --config .flake8
 
 if ($LastExitCode -ne 0) {
     $failure = $true
