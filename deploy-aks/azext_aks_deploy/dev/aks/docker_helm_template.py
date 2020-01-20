@@ -46,32 +46,32 @@ def get_helm_charts(language, acr_details, port):
     files = []
     if not language_packs_path:
         logger.debug('get_helm_charts(): No language packs found.')
-    else:
-        try:
-            abs_pack_path = FILE_ABSOLUTE_PATH + language_packs_path
-            # r=root, d=directories, f = files
-            logger.debug("Checking in helm charts")
-            for r, _d, f in os.walk(abs_pack_path):
-                if 'charts' not in r:
-                    continue
-                for file in f:
-                    if '__pycache__' not in r and '__init__.py' not in file:
-                        file_path = os.path.join(r, file)
-                        file_content = get_file_content(file_path)
-                        # replace values in charts
-                        if 'values.yaml' in file_path:
-                            logger.debug("Replacing values in values.yaml")
-                            file_content = replace_values(file_content, acr_details)
-                            file_content = replace_port(file_content, port)
-                        if file_path.startswith(abs_pack_path):
-                            file_path = file_path[len(abs_pack_path):]
-                            file_path = file_path.replace('\\', '/')
-                        file_obj = Files(path=file_path, content=file_content)
-                        logger.debug("Checkin file path: %s", file_path)
-                        logger.debug("Checkin file content: %s", file_content)
-                        files.append(file_obj)
-        except Exception as ex:
-            raise CLIError(ex)
+        return files
+    try:
+        abs_pack_path = FILE_ABSOLUTE_PATH + language_packs_path
+        # r=root, d=directories, f = files
+        logger.debug("Checking in helm charts")
+        for r, _d, f in os.walk(abs_pack_path):
+            if 'charts' not in r:
+                continue
+            for file in f:
+                if '__pycache__' not in r and '__init__.py' not in file:
+                    file_path = os.path.join(r, file)
+                    file_content = get_file_content(file_path)
+                    # replace values in charts
+                    if 'values.yaml' in file_path:
+                        logger.debug("Replacing values in values.yaml")
+                        file_content = replace_values(file_content, acr_details)
+                        file_content = replace_port(file_content, port)
+                    if file_path.startswith(abs_pack_path):
+                        file_path = file_path[len(abs_pack_path):]
+                        file_path = file_path.replace('\\', '/')
+                    file_obj = Files(path=file_path, content=file_content)
+                    logger.debug("Checkin file path: %s", file_path)
+                    logger.debug("Checkin file content: %s", file_content)
+                    files.append(file_obj)
+    except Exception as ex:
+        raise CLIError(ex)
     return files
 
 
