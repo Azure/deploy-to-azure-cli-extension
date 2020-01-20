@@ -3,15 +3,15 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 try:
-    from urllib.parse import urlparse, quote
+    from urllib.parse import urlparse
 except ImportError:
-    from urllib import quote
     from urlparse import urlparse
 
 from knack.log import get_logger
 
 
 logger = get_logger(__name__)
+
 
 def get_repository_url_from_local_repo():
     return get_remote_url(is_github_url_candidate)
@@ -41,6 +41,7 @@ def get_remote_url(validation_function=None):
                                                                    validation_function(value)):
                 return value
     return None
+
 
 def get_git_remotes():
     import subprocess

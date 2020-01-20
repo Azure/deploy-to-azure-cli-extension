@@ -3,7 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.help_files import helps
 
-def load_aks_arguments(self, _):
-    with self.argument_context('aks up') as context:
-        context.argument('repository', options_list=('--repository', '-r'))
+
+def load_functionapp_help():
+    helps['functionapp up'] = """
+    type: command
+    short-summary: Deploy to Functionapp via GitHub actions.
+    long-summary:
+    """

@@ -6,7 +6,7 @@
 from knack.help_files import helps
 
 
-def load_admin_help():
+def load_aks_help():
     helps['aks up'] = """
     type: command
     short-summary: Deploy to AKS via GitHub actions.

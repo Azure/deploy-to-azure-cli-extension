@@ -3,7 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.commands import CliCommandType
 
-def load_aks_arguments(self, _):
-    with self.argument_context('aks up') as context:
-        context.argument('repository', options_list=('--repository', '-r'))
+functionappops = CliCommandType(
+    operations_tmpl='azext_aks_deploy.dev.functionapp.up#{}'
+)
+
+
+def load_functionapp_commands(self, _):
+    with self.command_group('functionapp', command_type=functionappops) as g:
+        g.command('up', 'functionapp_deploy')
