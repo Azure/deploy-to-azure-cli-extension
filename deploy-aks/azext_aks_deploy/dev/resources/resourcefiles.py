@@ -45,3 +45,66 @@ jobs:
           container_registry_name_place_holder.azurecr.io/app_name_place_holder:${{ github.sha }}
         imagepullsecrets: |
           demo-k8s-secret"""
+
+
+DEPLOY_TO_FUNCTIONAPP_TEMPLATE = """# Action Requires
+# 1. Setup the AZURE_CREDENTIALS secrets in your GitHub Repository
+# 2. Replace app_name_place_holder with your Azure function app name
+# 3. Add this yaml file to your project's .github/workflows/
+# 4. Push your local project to your GitHub Repository
+
+name: Linux_Python_Workflow
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@master
+
+    # If you want to use publish profile credentials instead of Azure Service Principal
+    # Please comment this 'Login via Azure CLI' block
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Setup Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+
+    - name: 'Run pip'
+      shell: bash
+      run: |
+        # If your function app project is not located in your repository's root
+        # Please change your directory for pip in pushd
+        pushd .
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt --target=".python_packages/lib/python3.6/site-packages"
+        popd
+
+    - name: 'Run Azure Functions Action'
+      uses: Azure/functions-action@v1
+      id: fa
+      with:
+        app-name: app_name_place_holder
+        # If your function app project is not located in your repository's root
+        # Please consider prefixing the project path in this package parameter
+        package: '.'
+        # If you want to use publish profile credentials instead of Azure Service Principal
+        # Please uncomment the following line
+        # publish-profile: ${{ secrets.SCM_CREDENTIALS }}
+
+    #- name: 'use the published functionapp url in upcoming steps'
+    #  run: |
+    #    echo "${{ steps.fa.outputs.app-url }}"
+
+# For more information on GitHub Actions:
+#   https://help.github.com/en/categories/automating-your-workflow-with-github-actions
+"""

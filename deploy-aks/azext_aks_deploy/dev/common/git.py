@@ -8,9 +8,45 @@ except ImportError:
     from urlparse import urlparse
 
 from knack.log import get_logger
+from knack.util import CLIError
+from knack.prompting import prompt
 
 
 logger = get_logger(__name__)
+
+
+def resolve_repository(repository_url, detect=True):
+    """
+    Resolve repo url from-
+    1. Input parameter
+    2. Local repo context, if detect is true
+    3. User input
+    """
+    if not repository_url and detect:
+        repository_url = get_repository_url_from_local_repo()
+        logger.debug('Github Remote url detected local repo is %s', repository_url)
+    if not repository_url:
+        repository_url = prompt('GitHub Repository url (e.g. https://github.com/azure/azure-cli):')
+    if not repository_url:
+        raise CLIError('The following arguments are required: --repository.')
+    repository_name = get_repo_name_from_repo_url(repository_url)
+    return repository_name, repository_url
+
+
+def get_repo_name_from_repo_url(repository_url):
+    """
+    Should be called with a valid github url
+    returns owner/reponame for github repos, repo_name for azure repo type
+    """
+    parsed_url = uri_parse(repository_url)
+    logger.debug('Parsing GitHub url: %s', parsed_url)
+    if parsed_url.scheme == 'https' and parsed_url.netloc == 'github.com':
+        logger.debug('Parsing path in the url to find repo id.')
+        stripped_path = parsed_url.path.strip('/')
+        if stripped_path.endswith('.git'):
+            stripped_path = stripped_path[:-4]
+        return stripped_path
+    raise CLIError('Could not parse repository url.')
 
 
 def get_repository_url_from_local_repo():

@@ -56,6 +56,16 @@ def create_acr(registry_name, resource_group, sku):
         raise CLIError(ex)
 
 
+def create_functionapp(app_name, resource_group, show_warning=True):
+    _subscription_id, subscription_name, _tenant_id, _environment_name = get_default_subscription_info()
+    if show_warning:
+        logger.warning('Using your default Azure subscription %s for creating new Azure Container Registry.',
+                       subscription_name)
+    #  Todo-atbagga
+    #  place holder function et to implement
+    return ""
+
+
 def get_resource_group():
     _subscription_id, subscription_name, _tenant_id, _environment_name = get_default_subscription_info()
     logger.warning("Using your default Azure subscription %s for fetching Resource Groups.", subscription_name)
@@ -146,6 +156,43 @@ def get_acr_details(name=None):
     else:
         acr_details = acr_list[registry_choice]
     return acr_details
+
+
+def get_functionapp_details(name=None):
+    _subscription_id, subscription_name, _tenant_id, _environment_name = get_default_subscription_info()
+    logger.warning("Using your default Azure subscription %s for fetching Functionapps.", subscription_name)
+    functionapp_list = subprocess.check_output('az functionapp list -o json', shell=True)
+    functionapp_list = json.loads(functionapp_list)
+    if not functionapp_list:
+        logger.debug("No Functionapp deployments found in your Azure subscription.")
+    functionapp_choice = 0
+    app_choice_list = []
+    for app in functionapp_list:
+        if not name:
+            app_choice_list.append(app['name'])
+        elif name.lower() == app['name'].lower():
+            return app
+    if name is not None:
+        raise CLIError('Cluster with name {} could not be found. Please check using command az functionapp list.'
+                       .format(name))
+
+    app_choice_list.append('Create a new Functionapp.')
+    app_details = None
+    functionapp_choice = prompt_user_friendly_choice_list(
+        "Which Functionapp do you want to target?", app_choice_list)
+    if functionapp_choice == len(app_choice_list) - 1:
+        app_name = prompt('Please enter name of the Functionapp to be created: ')
+        resource_group = get_resource_group()
+        # check if app already exists
+        for app in functionapp_list:
+            if app_name.lower() == app['name'].lower() and app['resourceGroup']:
+                logger.warning('Functionapp with the same name already exists. Using the existing app.')
+                app_details = app
+        if not app_details:
+            app_details = create_functionapp(app_name, resource_group)
+    else:
+        app_details = functionapp_list[functionapp_choice]
+    return app_details
 
 
 def get_sku():
