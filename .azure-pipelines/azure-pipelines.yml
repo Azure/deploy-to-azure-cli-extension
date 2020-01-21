@@ -6,7 +6,8 @@
 trigger:
 - master
 
-pr: none
+pr: 
+- master
 
 jobs:
 
