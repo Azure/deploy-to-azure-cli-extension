@@ -16,7 +16,7 @@ from azext_aks_deploy.dev.common.github_api_helper import (Files, get_work_flow_
 from azext_aks_deploy.dev.common.github_workflow_helper import poll_workflow_status, get_new_workflow_yaml_name
 from azext_aks_deploy.dev.common.github_azure_secrets import get_azure_credentials
 from azext_aks_deploy.dev.common.kubectl import get_deployment_IP_port
-from azext_aks_deploy.dev.common.const import (APP_NAME_DEFAULT, APP_NAME_PLACEHOLDER,
+from azext_aks_deploy.dev.common.const import (CHECKIN_MESSAGE_AKS, APP_NAME_DEFAULT, APP_NAME_PLACEHOLDER,
                                                ACR_PLACEHOLDER, RG_PLACEHOLDER, PORT_NUMBER_DEFAULT,
                                                CLUSTER_PLACEHOLDER, RELEASE_PLACEHOLDER, RELEASE_NAME)
 from azext_aks_deploy.dev.aks.docker_helm_template import get_docker_templates, get_helm_charts
@@ -99,7 +99,9 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
         logger.debug("Checkin file content: %s", file_name.content)
 
     default_branch = get_default_branch(repo_name)
-    workflow_commit_sha = push_files_to_repository(repo_name, default_branch, files, branch_name)
+    workflow_commit_sha = push_files_to_repository(
+        repo_name=repo_name, default_branch=default_branch, files=files,
+        branch_name=branch_name, message=CHECKIN_MESSAGE_AKS)
     if workflow_commit_sha:
         print('Creating workflow...')
         check_run_id = get_work_flow_check_runID(repo_name, workflow_commit_sha)
