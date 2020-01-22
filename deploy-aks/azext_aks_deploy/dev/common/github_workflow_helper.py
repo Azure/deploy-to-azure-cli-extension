@@ -5,8 +5,12 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.util import CLIError
+from knack.log import get_logger
 
 from azext_aks_deploy.dev.common.github_api_helper import get_check_run_status_and_conclusion
+from azext_aks_deploy.dev.common.prompting import prompt_not_empty
+
+logger = get_logger(__name__)
 
 
 def poll_workflow_status(repo_name, check_run_id):
@@ -42,3 +46,11 @@ def poll_workflow_status(repo_name, check_run_id):
         print('Workflow succeeded')
     else:
         raise CLIError('Workflow status: {}'.format(check_run_conclusion))
+
+
+def get_new_workflow_yaml_name():
+    logger.warning('A yaml file main.yml already exists in the .github/workflows folder.')
+    new_workflow_yml_name = prompt_not_empty(
+        msg='Enter a new name for workflow yml file: ',
+        help_string='e.g. /new_main.yml to add in the .github/workflows folder.')
+    return new_workflow_yml_name

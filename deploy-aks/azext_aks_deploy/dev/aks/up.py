@@ -3,25 +3,22 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.prompting import prompt
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azext_aks_deploy.dev.common.git import get_repository_url_from_local_repo
+from azext_aks_deploy.dev.common.git import resolve_repository
 from azext_aks_deploy.dev.common.github_api_helper import (Files, get_work_flow_check_runID,
+                                                           push_files_to_repository,
                                                            get_languages_for_repo,
                                                            get_github_pat_token,
-                                                           push_files_github,
                                                            get_default_branch,
                                                            check_file_exists)
-from azext_aks_deploy.dev.common.github_workflow_helper import poll_workflow_status
+from azext_aks_deploy.dev.common.github_workflow_helper import poll_workflow_status, get_new_workflow_yaml_name
 from azext_aks_deploy.dev.common.github_azure_secrets import get_azure_credentials
-from azext_aks_deploy.dev.common.utils import get_repo_name_from_repo_url
 from azext_aks_deploy.dev.common.kubectl import get_deployment_IP_port
-from azext_aks_deploy.dev.common.const import (APP_NAME_DEFAULT, APP_NAME_PLACEHOLDER,
+from azext_aks_deploy.dev.common.const import (CHECKIN_MESSAGE_AKS, APP_NAME_DEFAULT, APP_NAME_PLACEHOLDER,
                                                ACR_PLACEHOLDER, RG_PLACEHOLDER, PORT_NUMBER_DEFAULT,
                                                CLUSTER_PLACEHOLDER, RELEASE_PLACEHOLDER, RELEASE_NAME)
-from azext_aks_deploy.dev.common.prompting import prompt_user_friendly_choice_list, prompt_not_empty
 from azext_aks_deploy.dev.aks.docker_helm_template import get_docker_templates, get_helm_charts
 
 logger = get_logger(__name__)
@@ -47,14 +44,7 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
     :param do_not_wait : Do not wait for workflow completion.
     :type do_not_wait bool
     """
-    if repository is None:
-        repository = get_repository_url_from_local_repo()
-        logger.debug('Github Remote url detected local repo is %s', repository)
-    if not repository:
-        repository = prompt('GitHub Repository url (e.g. https://github.com/atbagga/aks-deploy):')
-    if not repository:
-        raise CLIError('The following arguments are required: --repository.')
-    repo_name = get_repo_name_from_repo_url(repository)
+    repo_name, repository = resolve_repository(repository)
 
     get_github_pat_token(token_prefix=aks_token_prefix + repo_name, display_warning=True)
     logger.warning('Setting up your workflow.')
@@ -110,7 +100,9 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
         logger.debug("Checkin file content: %s", file_name.content)
 
     default_branch = get_default_branch(repo_name)
-    workflow_commit_sha = push_files_to_repository(repo_name, default_branch, files, branch_name)
+    workflow_commit_sha = push_files_to_repository(
+        repo_name=repo_name, default_branch=default_branch, files=files,
+        branch_name=branch_name, message=CHECKIN_MESSAGE_AKS)
     if workflow_commit_sha:
         print('Creating workflow...')
         check_run_id = get_work_flow_check_runID(repo_name, workflow_commit_sha)
@@ -143,25 +135,6 @@ def get_yaml_template_for_repo(cluster_details, acr_details, repo_name):
                                  .replace(RELEASE_PLACEHOLDER, RELEASE_NAME)
                                  .replace(RG_PLACEHOLDER, cluster_details['resourceGroup'])))
     return files_to_return
-
-
-def push_files_to_repository(repo_name, default_branch, files, branch_name):
-    commit_direct_to_branch = 0
-    if not branch_name:
-        commit_strategy_choice_list = ['Commit directly to the {branch} branch.'.format(branch=default_branch),
-                                       'Create a new branch for this commit and start a pull request.']
-        commit_choice = prompt_user_friendly_choice_list("How do you want to commit the files to the repository?",
-                                                         commit_strategy_choice_list)
-        commit_direct_to_branch = commit_choice == 0
-    return push_files_github(files, repo_name, default_branch, commit_direct_to_branch, branch_name=branch_name)
-
-
-def get_new_workflow_yaml_name():
-    logger.warning('A yaml file main.yml already exists in the .github/workflows folder.')
-    new_workflow_yml_name = prompt_not_empty(
-        msg='Enter a new name for workflow yml file: ',
-        help_string='e.g. /new_main.yml to add in the .github/workflows folder.')
-    return new_workflow_yml_name
 
 
 def choose_supported_language(languages):

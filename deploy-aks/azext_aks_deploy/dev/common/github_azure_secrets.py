@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.log import get_logger
+from knack.prompting import prompt
 from azext_aks_deploy.dev.common.prompting import prompt_user_friendly_choice_list
 from azext_aks_deploy.dev.common.azure_cli_resources import get_default_subscription_info
 
@@ -45,3 +46,23 @@ def get_azure_credentials():
         azure_creds_user_choice = prompt_user_friendly_choice_list(
             'Have you copied the name and value for AZURE_CREDENTIALS, REGISTRY_USERNAME and REGISTRY_PASSWORD:',
             user_choice_list)
+
+
+def get_azure_credentials_functionapp(app_name):
+    import subprocess
+    import json
+    _subscription_id, _subscription_name, _tenant_id, _environment_name = get_default_subscription_info()
+    print('')
+    print('You need to include the following key value pairs as part of your Secrets in the GitHub Repo Setting.')
+    print('Please go to your GitHub Repo page -> Settings -> Secrets -> '
+          'Add a new secret and include the following Name and value pairs.')
+    print('Creating AZURE_CREDENTIALS secret...')
+    auth_details = subprocess.check_output(
+        'az ad sp create-for-rbac --name {} --role contributor --sdk-auth -o json'.format(app_name),
+        shell=True)
+    auth_details_json = json.loads(auth_details)
+    print('')
+    print('Name: AZURE_CREDENTIALS')
+    print('Value:')
+    print(json.dumps(auth_details_json, indent=2))
+    _azure_creds_user_choice = prompt(msg='Set the secret in the repository and press enter to continue.')

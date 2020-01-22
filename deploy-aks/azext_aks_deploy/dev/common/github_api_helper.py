@@ -6,7 +6,7 @@ import time
 import requests
 from knack.log import get_logger
 from knack.util import CLIError
-from azext_aks_deploy.dev.common.prompting import prompt_not_empty
+from azext_aks_deploy.dev.common.prompting import prompt_user_friendly_choice_list, prompt_not_empty
 from azext_aks_deploy.dev.common.git import resolve_git_ref_heads, get_branch_name_from_ref
 
 logger = get_logger(__name__)
@@ -33,7 +33,7 @@ def get_github_repos_api_url(repo_id):
 
 
 def push_files_github(files, repo_name, branch, commit_to_branch,
-                      message="Setting up K8s deployment workflow", branch_name=None):
+                      message="Setting up deployment workflow", branch_name=None):
     """ Push files to a Github branch or raise a PR to the branch depending on
     commit_to_branch parameter.
     return: If commit_to_branch is true, returns the commit sha else returns None
@@ -275,3 +275,16 @@ def get_check_run_status_and_conclusion(repo_name, check_run_id):
         raise CLIError('Get Check Run failed. Error: ({err})'.format(err=get_response.reason))
     import json
     return json.loads(get_response.text)['status'], json.loads(get_response.text)['conclusion']
+
+
+def push_files_to_repository(repo_name, default_branch, files, branch_name, message=None):
+    commit_direct_to_branch = 0
+    if not branch_name:
+        commit_strategy_choice_list = ['Commit directly to the {branch} branch.'.format(branch=default_branch),
+                                       'Create a new branch for this commit and start a pull request.']
+        commit_choice = prompt_user_friendly_choice_list("How do you want to commit the files to the repository?",
+                                                         commit_strategy_choice_list)
+        commit_direct_to_branch = commit_choice == 0
+    return push_files_github(
+        files=files, repo_name=repo_name, branch=default_branch, commit_to_branch=commit_direct_to_branch,
+        message=message, branch_name=branch_name)
