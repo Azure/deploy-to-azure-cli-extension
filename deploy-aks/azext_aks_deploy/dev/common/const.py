@@ -14,6 +14,9 @@ PORT_NUMBER_DEFAULT = '8080'
 APP_NAME_DEFAULT = 'k8sdemo'
 RELEASE_NAME = 'aksupdemo'
 
-FUNCTIONAPP_DEFAULT_NAME = "functionappdemo"
+# Checkin message strings
+
+CHECKIN_MESSAGE_AKS = 'Setting up AKS deployment workflow'
+CHECKIN_MESSAGE_FUNCTIONAPP = 'Setting up Functionapp deployment workflow'
 
 RELEASE_PLACEHOLDER = 'release_name_place_holder'

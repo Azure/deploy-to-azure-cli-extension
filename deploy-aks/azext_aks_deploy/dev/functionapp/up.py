@@ -7,12 +7,14 @@ from knack.util import CLIError
 
 from azext_aks_deploy.dev.common.git import resolve_repository
 from azext_aks_deploy.dev.common.github_api_helper import (Files, get_work_flow_check_runID,
+                                                           push_files_to_repository, 
                                                            get_languages_for_repo,
                                                            get_github_pat_token,
-                                                           push_files_github,
+                                                           get_default_branch,
                                                            check_file_exists)
 from azext_aks_deploy.dev.common.github_workflow_helper import poll_workflow_status
-from azext_aks_deploy.dev.common.github_azure_secrets import get_azure_credentials
+from azext_aks_deploy.dev.common.github_azure_secrets import get_azure_credentials_functionapp
+from azext_aks_deploy.dev.common.const import CHECKIN_MESSAGE_FUNCTIONAPP
 
 logger = get_logger(__name__)
 
@@ -46,13 +48,18 @@ def functionapp_deploy(app_name=None, repository=None, skip_secrets_generation=F
         logger.debug('Languages detected : %s', languages)
         raise CLIError('The languages in this repository are not yet supported from up command.')
 
+    # assuming the host.json is in the root directory for now
+    # Todo - atbagga
+    ensure_function_app(repo_name=repo_name)
+
     from azext_aks_deploy.dev.common.azure_cli_resources import get_functionapp_details
     app_details = get_functionapp_details(app_name)
     logger.debug(app_details)
+    app_name = app_details['name']
 
     # create azure service principal and display json on the screen for user to configure it as Github secrets
     if not skip_secrets_generation:
-        get_azure_credentials()
+        get_azure_credentials_functionapp(app_name)
 
     print('')
     files = get_functionapp_yaml_template_for_repo(app_name, repo_name)
@@ -62,8 +69,10 @@ def functionapp_deploy(app_name=None, repository=None, skip_secrets_generation=F
         logger.debug("Checkin file path: %s", file_name.path)
         logger.debug("Checkin file content: %s", file_name.content)
 
-    workflow_commit_sha = push_files_github(files, repo_name, 'master', True,
-                                            message="Setting up K8s deployment workflow.")
+    default_branch = get_default_branch(repo_name)
+    workflow_commit_sha = push_files_to_repository(
+        files=files, default_branch=default_branch, repo_name=repo_name, branch_name=branch_name,
+        message=CHECKIN_MESSAGE_FUNCTIONAPP)
     print('Creating workflow...')
     check_run_id = get_work_flow_check_runID(repo_name, workflow_commit_sha)
     workflow_url = 'https://github.com/{repo_id}/runs/{checkID}'.format(repo_id=repo_name, checkID=check_run_id)
@@ -71,6 +80,17 @@ def functionapp_deploy(app_name=None, repository=None, skip_secrets_generation=F
 
     if not do_not_wait:
         poll_workflow_status(repo_name, check_run_id)
+
+
+def ensure_function_app(repo_name, path=None):
+    if path:
+        path_to_host = path
+    else:
+        path_to_host = 'host.json'
+    if check_file_exists(repo_name, path_to_host):
+        logger.debug("Host.json was found at %s", path_to_host)
+    else:
+        raise CLIError('host.json could not be located at {}.'.format(path_to_host))
 
 
 def get_functionapp_yaml_template_for_repo(app_name, repo_name):

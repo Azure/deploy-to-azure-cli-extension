@@ -8,9 +8,9 @@ from knack.util import CLIError
 
 from azext_aks_deploy.dev.common.git import resolve_repository
 from azext_aks_deploy.dev.common.github_api_helper import (Files, get_work_flow_check_runID,
+                                                           push_files_to_repository,
                                                            get_languages_for_repo,
                                                            get_github_pat_token,
-                                                           push_files_github,
                                                            get_default_branch,
                                                            check_file_exists)
 from azext_aks_deploy.dev.common.github_workflow_helper import poll_workflow_status, get_new_workflow_yaml_name
@@ -19,7 +19,6 @@ from azext_aks_deploy.dev.common.kubectl import get_deployment_IP_port
 from azext_aks_deploy.dev.common.const import (APP_NAME_DEFAULT, APP_NAME_PLACEHOLDER,
                                                ACR_PLACEHOLDER, RG_PLACEHOLDER, PORT_NUMBER_DEFAULT,
                                                CLUSTER_PLACEHOLDER, RELEASE_PLACEHOLDER, RELEASE_NAME)
-from azext_aks_deploy.dev.common.prompting import prompt_user_friendly_choice_list
 from azext_aks_deploy.dev.aks.docker_helm_template import get_docker_templates, get_helm_charts
 
 logger = get_logger(__name__)
@@ -133,17 +132,6 @@ def get_yaml_template_for_repo(cluster_details, acr_details, repo_name):
                                  .replace(RELEASE_PLACEHOLDER, RELEASE_NAME)
                                  .replace(RG_PLACEHOLDER, cluster_details['resourceGroup'])))
     return files_to_return
-
-
-def push_files_to_repository(repo_name, default_branch, files, branch_name):
-    commit_direct_to_branch = 0
-    if not branch_name:
-        commit_strategy_choice_list = ['Commit directly to the {branch} branch.'.format(branch=default_branch),
-                                       'Create a new branch for this commit and start a pull request.']
-        commit_choice = prompt_user_friendly_choice_list("How do you want to commit the files to the repository?",
-                                                         commit_strategy_choice_list)
-        commit_direct_to_branch = commit_choice == 0
-    return push_files_github(files, repo_name, default_branch, commit_direct_to_branch, branch_name=branch_name)
 
 
 def choose_supported_language(languages):
