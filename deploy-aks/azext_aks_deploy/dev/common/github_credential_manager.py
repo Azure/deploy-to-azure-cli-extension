@@ -39,7 +39,7 @@ class GithubCredentialManager():
             return
         self.password = prompt_pass(msg='Enter your GitHub password: ')
         if not note:
-            note = token_prefix + "_AksUpCLIExtension_" + time_now_as_string()
+            note = token_prefix + "_" + time_now_as_string()
         encoded_pass = base64.b64encode(self.username.encode('utf-8') + b':' + self.password.encode('utf-8'))
         basic_auth = 'basic ' + encoded_pass.decode("utf-8")
         request_body = {

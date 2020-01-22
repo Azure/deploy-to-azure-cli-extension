@@ -16,6 +16,7 @@ from azext_aks_deploy.dev.common.github_azure_secrets import get_azure_credentia
 from azext_aks_deploy.dev.common.utils import get_repo_name_from_repo_url
 
 logger = get_logger(__name__)
+functionapp_token_prefix = "FunctionAppUpCLIExt_"
 
 
 def functionapp_deploy(repository=None, skip_secrets_generation=False, do_not_wait=False):
@@ -36,7 +37,7 @@ def functionapp_deploy(repository=None, skip_secrets_generation=False, do_not_wa
         raise CLIError('The following arguments are required: --repository.')
     repo_name = get_repo_name_from_repo_url(repository)
 
-    get_github_pat_token(token_prefix=repo_name, display_warning=True)
+    get_github_pat_token(token_prefix=functionapp_token_prefix + repo_name, display_warning=True)
     logger.warning('Setting up your workflow.')
 
     # create azure service principal and display json on the screen for user to configure it as Github secrets
