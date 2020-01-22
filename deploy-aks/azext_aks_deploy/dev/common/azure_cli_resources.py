@@ -56,7 +56,7 @@ def create_acr(registry_name, resource_group, sku):
         raise CLIError(ex)
 
 
-def create_functionapp(app_name, resource_group, show_warning=True):
+def create_functionapp(_app_name, _resource_group, show_warning=True):
     _subscription_id, subscription_name, _tenant_id, _environment_name = get_default_subscription_info()
     if show_warning:
         logger.warning('Using your default Azure subscription %s for creating new Azure Container Registry.',

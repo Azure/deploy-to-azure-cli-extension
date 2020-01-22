@@ -6,7 +6,7 @@
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azext_aks_deploy.dev.common.git import get_repository_url_from_local_repo, resolve_repository
+from azext_aks_deploy.dev.common.git import resolve_repository
 from azext_aks_deploy.dev.common.github_api_helper import (Files, get_work_flow_check_runID,
                                                            get_languages_for_repo,
                                                            get_github_pat_token,
@@ -19,7 +19,7 @@ from azext_aks_deploy.dev.common.kubectl import get_deployment_IP_port
 from azext_aks_deploy.dev.common.const import (APP_NAME_DEFAULT, APP_NAME_PLACEHOLDER,
                                                ACR_PLACEHOLDER, RG_PLACEHOLDER, PORT_NUMBER_DEFAULT,
                                                CLUSTER_PLACEHOLDER, RELEASE_PLACEHOLDER, RELEASE_NAME)
-from azext_aks_deploy.dev.common.prompting import prompt_user_friendly_choice_list, prompt_not_empty
+from azext_aks_deploy.dev.common.prompting import prompt_user_friendly_choice_list
 from azext_aks_deploy.dev.aks.docker_helm_template import get_docker_templates, get_helm_charts
 
 logger = get_logger(__name__)

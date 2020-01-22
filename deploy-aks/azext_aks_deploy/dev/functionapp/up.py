@@ -5,12 +5,11 @@
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azext_aks_deploy.dev.common.git import get_repository_url_from_local_repo, resolve_repository
+from azext_aks_deploy.dev.common.git import resolve_repository
 from azext_aks_deploy.dev.common.github_api_helper import (Files, get_work_flow_check_runID,
                                                            get_languages_for_repo,
                                                            get_github_pat_token,
                                                            push_files_github,
-                                                           get_default_branch,
                                                            check_file_exists)
 from azext_aks_deploy.dev.common.github_workflow_helper import poll_workflow_status
 from azext_aks_deploy.dev.common.github_azure_secrets import get_azure_credentials
@@ -18,7 +17,8 @@ from azext_aks_deploy.dev.common.github_azure_secrets import get_azure_credentia
 logger = get_logger(__name__)
 
 
-def functionapp_deploy(app_name=None, repository=None, skip_secrets_generation=False, branch_name=None, do_not_wait=False):
+def functionapp_deploy(app_name=None, repository=None, skip_secrets_generation=False,
+                       branch_name=None, do_not_wait=False):
     """Setup GitHub Action to build and deploy to Azure FunctionApp
     :param repository: GitHub repository URL e.g. https://github.com/azure/azure-cli.
     :type repository: str
