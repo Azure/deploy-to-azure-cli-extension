@@ -173,7 +173,7 @@ def get_functionapp_details(name=None):
         elif name.lower() == app['name'].lower():
             return app
     if name is not None:
-        raise CLIError('Cluster with name {} could not be found. Please check using command az functionapp list.'
+        raise CLIError('Functionapp with name {} could not be found. Please check using command az functionapp list.'
                        .format(name))
 
     app_choice_list.append('Create a new Functionapp.')
