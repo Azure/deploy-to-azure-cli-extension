@@ -7,7 +7,7 @@ from knack.util import CLIError
 
 from azext_aks_deploy.dev.common.git import resolve_repository
 from azext_aks_deploy.dev.common.github_api_helper import (Files, get_work_flow_check_runID,
-                                                           push_files_to_repository, 
+                                                           push_files_to_repository,
                                                            get_languages_for_repo,
                                                            get_github_pat_token,
                                                            get_default_branch,
