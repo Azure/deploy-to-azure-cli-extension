@@ -7,8 +7,14 @@ from knack.help_files import helps
 
 
 def load_functionapp_help():
-    helps['functionapp app-up'] = """
+    helps['functionapp app'] = """
+    type: group
+    short-summary: Commands to manage Azure Functions app.
+    long-summary:
+    """
+
+    helps['functionapp app up'] = """
     type: command
-    short-summary: Deploy to Functionapp via GitHub actions.
+    short-summary: Deploy to Azure Functions via GitHub actions.
     long-summary:
     """

@@ -5,5 +5,5 @@
 
 
 def load_functionapp_arguments(self, _):
-    with self.argument_context('functionapp app-up') as context:
+    with self.argument_context('functionapp app up') as context:
         context.argument('repository', options_list=('--repository', '-r'))
