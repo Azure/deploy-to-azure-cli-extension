@@ -8,7 +8,7 @@ import requests
 from knack.prompting import prompt, prompt_pass
 from knack.log import get_logger
 from knack.util import CLIError
-from azext_aks_deploy.dev.common.utils import time_now_as_string, singleton
+from azext_deploy_to_azure.dev.common.utils import time_now_as_string, singleton
 
 GITHUB_PAT_ENVKEY = "GITHUB_PAT"
 

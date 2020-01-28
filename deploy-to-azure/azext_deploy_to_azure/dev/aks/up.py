@@ -6,20 +6,20 @@
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azext_aks_deploy.dev.common.git import resolve_repository
-from azext_aks_deploy.dev.common.github_api_helper import (Files, get_work_flow_check_runID,
-                                                           push_files_to_repository,
-                                                           get_languages_for_repo,
-                                                           get_github_pat_token,
-                                                           get_default_branch,
-                                                           check_file_exists)
-from azext_aks_deploy.dev.common.github_workflow_helper import poll_workflow_status, get_new_workflow_yaml_name
-from azext_aks_deploy.dev.common.github_azure_secrets import get_azure_credentials
-from azext_aks_deploy.dev.common.kubectl import get_deployment_IP_port
-from azext_aks_deploy.dev.common.const import (CHECKIN_MESSAGE_AKS, APP_NAME_DEFAULT, APP_NAME_PLACEHOLDER,
-                                               ACR_PLACEHOLDER, RG_PLACEHOLDER, PORT_NUMBER_DEFAULT,
-                                               CLUSTER_PLACEHOLDER, RELEASE_PLACEHOLDER, RELEASE_NAME)
-from azext_aks_deploy.dev.aks.docker_helm_template import get_docker_templates, get_helm_charts
+from azext_deploy_to_azure.dev.common.git import resolve_repository
+from azext_deploy_to_azure.dev.common.github_api_helper import (Files, get_work_flow_check_runID,
+                                                                push_files_to_repository,
+                                                                get_languages_for_repo,
+                                                                get_github_pat_token,
+                                                                get_default_branch,
+                                                                check_file_exists)
+from azext_deploy_to_azure.dev.common.github_workflow_helper import poll_workflow_status, get_new_workflow_yaml_name
+from azext_deploy_to_azure.dev.common.github_azure_secrets import get_azure_credentials
+from azext_deploy_to_azure.dev.common.kubectl import get_deployment_IP_port
+from azext_deploy_to_azure.dev.common.const import (CHECKIN_MESSAGE_AKS, APP_NAME_DEFAULT, APP_NAME_PLACEHOLDER,
+                                                    ACR_PLACEHOLDER, RG_PLACEHOLDER, PORT_NUMBER_DEFAULT,
+                                                    CLUSTER_PLACEHOLDER, RELEASE_PLACEHOLDER, RELEASE_NAME)
+from azext_deploy_to_azure.dev.aks.docker_helm_template import get_docker_templates, get_helm_charts
 
 logger = get_logger(__name__)
 aks_token_prefix = "AksAppUpCLIExt_"
@@ -59,9 +59,9 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
         logger.debug('Languages detected : %s', languages)
         raise CLIError('The languages in this repository are not yet supported from up command.')
 
-    from azext_aks_deploy.dev.common.azure_cli_resources import (get_aks_details,
-                                                                 get_acr_details,
-                                                                 configure_aks_credentials)
+    from azext_deploy_to_azure.dev.common.azure_cli_resources import (get_aks_details,
+                                                                      get_acr_details,
+                                                                      configure_aks_credentials)
     cluster_details = get_aks_details(aks_cluster)
     logger.debug(cluster_details)
     acr_details = get_acr_details(acr)
@@ -126,7 +126,7 @@ def get_yaml_template_for_repo(cluster_details, acr_details, repo_name):
     if check_file_exists(repo_name, workflow_yaml):
         yaml_file_name = get_new_workflow_yaml_name()
         workflow_yaml = github_workflow_path + yaml_file_name
-    from azext_aks_deploy.dev.resources.resourcefiles import DEPLOY_TO_AKS_TEMPLATE
+    from azext_deploy_to_azure.dev.resources.resourcefiles import DEPLOY_TO_AKS_TEMPLATE
     files_to_return.append(Files(path=workflow_yaml,
                                  content=DEPLOY_TO_AKS_TEMPLATE
                                  .replace(APP_NAME_PLACEHOLDER, APP_NAME_DEFAULT)

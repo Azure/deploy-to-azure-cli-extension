@@ -5,16 +5,16 @@
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azext_aks_deploy.dev.common.git import resolve_repository
-from azext_aks_deploy.dev.common.github_api_helper import (Files, get_work_flow_check_runID,
-                                                           push_files_to_repository,
-                                                           get_languages_for_repo,
-                                                           get_github_pat_token,
-                                                           get_default_branch,
-                                                           check_file_exists)
-from azext_aks_deploy.dev.common.github_workflow_helper import poll_workflow_status
-from azext_aks_deploy.dev.common.github_azure_secrets import get_azure_credentials_functionapp
-from azext_aks_deploy.dev.common.const import CHECKIN_MESSAGE_FUNCTIONAPP
+from azext_deploy_to_azure.dev.common.git import resolve_repository
+from azext_deploy_to_azure.dev.common.github_api_helper import (Files, get_work_flow_check_runID,
+                                                                push_files_to_repository,
+                                                                get_languages_for_repo,
+                                                                get_github_pat_token,
+                                                                get_default_branch,
+                                                                check_file_exists)
+from azext_deploy_to_azure.dev.common.github_workflow_helper import poll_workflow_status
+from azext_deploy_to_azure.dev.common.github_azure_secrets import get_azure_credentials_functionapp
+from azext_deploy_to_azure.dev.common.const import CHECKIN_MESSAGE_FUNCTIONAPP
 
 logger = get_logger(__name__)
 functionapp_token_prefix = "FunctionAppUpCLIExt_"
@@ -53,7 +53,7 @@ def functionapp_deploy(app_name=None, repository=None, skip_secrets_generation=F
     # Todo - atbagga
     ensure_function_app(repo_name=repo_name)
 
-    from azext_aks_deploy.dev.common.azure_cli_resources import get_functionapp_details
+    from azext_deploy_to_azure.dev.common.azure_cli_resources import get_functionapp_details
     app_details = get_functionapp_details(app_name)
     logger.debug(app_details)
     app_name = app_details['name']
@@ -101,11 +101,11 @@ def get_functionapp_yaml_template_for_repo(app_name, repo_name):
     yaml_file_name = 'main.yml'
     workflow_yaml = github_workflow_path + yaml_file_name
     if check_file_exists(repo_name, workflow_yaml):
-        from azext_aks_deploy.dev.common.github_workflow_helper import get_new_workflow_yaml_name
+        from azext_deploy_to_azure.dev.common.github_workflow_helper import get_new_workflow_yaml_name
         yaml_file_name = get_new_workflow_yaml_name()
         workflow_yaml = github_workflow_path + yaml_file_name
-    from azext_aks_deploy.dev.resources.resourcefiles import DEPLOY_TO_FUNCTIONAPP_TEMPLATE
-    from azext_aks_deploy.dev.common.const import APP_NAME_PLACEHOLDER
+    from azext_deploy_to_azure.dev.resources.resourcefiles import DEPLOY_TO_FUNCTIONAPP_TEMPLATE
+    from azext_deploy_to_azure.dev.common.const import APP_NAME_PLACEHOLDER
     files_to_return.append(Files(path=workflow_yaml,
                                  content=DEPLOY_TO_FUNCTIONAPP_TEMPLATE
                                  .replace(APP_NAME_PLACEHOLDER, app_name)))

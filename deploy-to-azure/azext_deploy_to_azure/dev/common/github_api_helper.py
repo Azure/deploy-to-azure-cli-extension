@@ -6,8 +6,8 @@ import time
 import requests
 from knack.log import get_logger
 from knack.util import CLIError
-from azext_aks_deploy.dev.common.prompting import prompt_user_friendly_choice_list, prompt_not_empty
-from azext_aks_deploy.dev.common.git import resolve_git_ref_heads, get_branch_name_from_ref
+from azext_deploy_to_azure.dev.common.prompting import prompt_user_friendly_choice_list, prompt_not_empty
+from azext_deploy_to_azure.dev.common.git import resolve_git_ref_heads, get_branch_name_from_ref
 
 logger = get_logger(__name__)
 
@@ -23,7 +23,7 @@ class Files:  # pylint: disable=too-few-public-methods
 
 
 def get_github_pat_token(token_prefix, display_warning=False):
-    from azext_aks_deploy.dev.common.github_credential_manager import GithubCredentialManager
+    from azext_deploy_to_azure.dev.common.github_credential_manager import GithubCredentialManager
     github_manager = GithubCredentialManager()
     return github_manager.get_token(token_prefix=token_prefix, display_warning=display_warning)
 

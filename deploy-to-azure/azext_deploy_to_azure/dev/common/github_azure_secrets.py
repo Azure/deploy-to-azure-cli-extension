@@ -5,8 +5,8 @@
 
 from knack.log import get_logger
 from knack.prompting import prompt
-from azext_aks_deploy.dev.common.prompting import prompt_user_friendly_choice_list
-from azext_aks_deploy.dev.common.azure_cli_resources import get_default_subscription_info
+from azext_deploy_to_azure.dev.common.prompting import prompt_user_friendly_choice_list
+from azext_deploy_to_azure.dev.common.azure_cli_resources import get_default_subscription_info
 
 logger = get_logger(__name__)
 

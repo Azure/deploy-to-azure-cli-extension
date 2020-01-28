@@ -1,1 +1,0 @@
-recursive-include azext_aks_deploy/dev/resources/packs *

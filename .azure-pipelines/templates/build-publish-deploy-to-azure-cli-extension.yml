@@ -1,0 +1,15 @@
+steps:
+  - script: 'pip install --upgrade .'
+    displayName: 'Install Deploy to Azure CLI extension'
+    workingDirectory: 'deploy-to-azure/'
+
+  - script: 'python setup.py sdist bdist_wheel'
+    displayName: 'Build wheel for Deplpy to Azure CLI extension'
+    workingDirectory: 'deploy-to-azure/'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Deploy to Azure CLI extension as artifact'
+    inputs:
+      pathtoPublish: 'deploy-to-azure/dist' 
+      artifactName: 'deploy-to-azure-cli-extension' 
+      publishLocation: 'Container'

@@ -5,11 +5,11 @@
 
 from azure.cli.core.commands import CliCommandType
 
-functionappops = CliCommandType(
-    operations_tmpl='azext_aks_deploy.dev.functionapp.up#{}'
+aksops = CliCommandType(
+    operations_tmpl='azext_deploy_to_azure.dev.aks.up#{}'
 )
 
 
-def load_functionapp_commands(self, _):
-    with self.command_group('functionapp app', command_type=functionappops) as g:
-        g.command('up', 'functionapp_deploy')
+def load_aks_commands(self, _):
+    with self.command_group('aks app', command_type=aksops) as g:
+        g.command('up', 'aks_deploy')
