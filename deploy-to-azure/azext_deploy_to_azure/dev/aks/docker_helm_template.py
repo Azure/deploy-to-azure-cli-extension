@@ -8,7 +8,7 @@ from os.path import dirname, abspath
 from knack.log import get_logger
 from knack.util import CLIError
 from azext_deploy_to_azure.dev.common.const import (APP_NAME_DEFAULT, APP_NAME_PLACEHOLDER,
-                                               PORT_NUMBER_PLACEHOLDER, ACR_PLACEHOLDER)
+                                                    PORT_NUMBER_PLACEHOLDER, ACR_PLACEHOLDER)
 from azext_deploy_to_azure.dev.common.github_api_helper import Files\
 
 logger = get_logger(__name__)

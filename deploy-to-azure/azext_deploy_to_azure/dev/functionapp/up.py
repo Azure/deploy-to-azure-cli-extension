@@ -7,11 +7,11 @@ from knack.util import CLIError
 
 from azext_deploy_to_azure.dev.common.git import resolve_repository
 from azext_deploy_to_azure.dev.common.github_api_helper import (Files, get_work_flow_check_runID,
-                                                           push_files_to_repository,
-                                                           get_languages_for_repo,
-                                                           get_github_pat_token,
-                                                           get_default_branch,
-                                                           check_file_exists)
+                                                                push_files_to_repository,
+                                                                get_languages_for_repo,
+                                                                get_github_pat_token,
+                                                                get_default_branch,
+                                                                check_file_exists)
 from azext_deploy_to_azure.dev.common.github_workflow_helper import poll_workflow_status
 from azext_deploy_to_azure.dev.common.github_azure_secrets import get_azure_credentials_functionapp
 from azext_deploy_to_azure.dev.common.const import CHECKIN_MESSAGE_FUNCTIONAPP
