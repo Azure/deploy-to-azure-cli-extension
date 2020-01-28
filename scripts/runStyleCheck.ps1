@@ -7,7 +7,7 @@ Write-Output "Installing flake8"
 python -m pip install --user flake8
 
 Write-Output "Running pylint on all source"
-python -m pylint --rcfile pylintrc ./deploy-aks/azext_aks_deploy -f colorized
+python -m pylint --rcfile pylintrc ./deploy-to-azure/azext_aks_deploy -f colorized
 
 if ($LastExitCode -ne 0) {
     $failure = $true

@@ -1,15 +1,15 @@
 steps:
   - script: 'pip install --upgrade .'
     displayName: 'Install AKS Deploy CLI extension'
-    workingDirectory: 'deploy-aks/'
+    workingDirectory: 'deploy-to-azure/'
 
   - script: 'python setup.py sdist bdist_wheel'
     displayName: 'Build wheel for AKS Deploy CLI extension'
-    workingDirectory: 'deploy-aks/'
+    workingDirectory: 'deploy-to-azure/'
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish AKS Deploy CLI extension as artifact'
     inputs:
-      pathtoPublish: 'deploy-aks/dist' 
+      pathtoPublish: 'deploy-to-azure/dist' 
       artifactName: 'aks-deploy-cli-extension' 
       publishLocation: 'Container'
