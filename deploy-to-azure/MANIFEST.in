@@ -1,1 +1,1 @@
-recursive-include azext_aks_deploy/dev/resources/packs *
+recursive-include azext_deploy_to_azure/dev/resources/packs *

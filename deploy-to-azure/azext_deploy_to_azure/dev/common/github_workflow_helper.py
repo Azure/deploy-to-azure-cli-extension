@@ -7,8 +7,8 @@
 from knack.util import CLIError
 from knack.log import get_logger
 
-from azext_aks_deploy.dev.common.github_api_helper import get_check_run_status_and_conclusion
-from azext_aks_deploy.dev.common.prompting import prompt_not_empty
+from azext_deploy_to_azure.dev.common.github_api_helper import get_check_run_status_and_conclusion
+from azext_deploy_to_azure.dev.common.prompting import prompt_not_empty
 
 logger = get_logger(__name__)
 

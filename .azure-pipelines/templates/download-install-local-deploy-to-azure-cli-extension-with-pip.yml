@@ -4,7 +4,7 @@ steps:
     inputs:
       buildType: 'current'
       downloadType: 'single'
-      artifactName: 'aks-deploy-cli-extension'
+      artifactName: 'deploy-to-azure-cli-extension'
       downloadPath: '$(System.ArtifactsDirectory)/extension'
 
   - task: PowerShell@2

@@ -11,5 +11,5 @@ steps:
     displayName: 'Publish AKS Deploy CLI extension as artifact'
     inputs:
       pathtoPublish: 'deploy-to-azure/dist' 
-      artifactName: 'aks-deploy-cli-extension' 
+      artifactName: 'deploy-to-azure-cli-extension' 
       publishLocation: 'Container'

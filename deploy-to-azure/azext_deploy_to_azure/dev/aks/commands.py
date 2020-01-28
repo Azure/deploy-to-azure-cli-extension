@@ -6,7 +6,7 @@
 from azure.cli.core.commands import CliCommandType
 
 aksops = CliCommandType(
-    operations_tmpl='azext_aks_deploy.dev.aks.up#{}'
+    operations_tmpl='azext_deploy_to_azure.dev.aks.up#{}'
 )
 
 

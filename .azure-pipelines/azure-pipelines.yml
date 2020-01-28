@@ -12,7 +12,7 @@ pr:
 jobs:
 
 
-- job: 'Build_Publish_AKS_Deploy_CLI_Extension'
+- job: 'Build_Publish_Deploy_To_Azure_CLI_Extension'
   pool:
     vmImage: 'Ubuntu-16.04'
 
@@ -24,7 +24,7 @@ jobs:
 
   - template: templates/setup-ci-machine.yml
 
-  - template: templates/build-publish-aks-deploy-cli-extension.yml
+  - template: templates/build-publish-deploy-to-azure-cli-extension.yml
 
 
 - job: 'Build_Publish_Azure_CLI_Test_SDK'
@@ -58,7 +58,7 @@ jobs:
 
   - template: templates/setup-ci-machine.yml
 
-  - template: templates/download-install-local-aks-deploy-cli-extension-with-pip.yml
+  - template: templates/download-install-local-deploy-to-azure-cli-extension-with-pip.yml
 
   - task: PowerShell@2
     displayName: 'Run Style Check'

@@ -8,7 +8,7 @@ import re
 from codecs import open
 from setuptools import setup, find_packages
 
-NAME = 'aks-deploy'
+NAME = 'deploy-to-azure'
 
 # To install the library, run the following
 #
@@ -21,7 +21,7 @@ REQUIRES = [
 ]
 
 # Version extraction inspired from 'requests'
-with open(os.path.join('azext_aks_deploy', 'version.py'), 'r') as fd:
+with open(os.path.join('azext_deploy_to_azure', 'version.py'), 'r') as fd:
     VERSION = re.search(r'^VERSION\s*=\s*[\'"]([^\'"]*)[\'"]',
                         fd.read(), re.MULTILINE).group(1)
 
@@ -50,14 +50,14 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
 setup(
     name=NAME,
     version=VERSION,
-    description="Extension to deploy to AKS.",
+    description="Extension to deploy to Azure.",
     long_description=README + '\n\n' + HISTORY,
     license='MIT',
     author="Microsoft",
     author_email="VSTS_Social@microsoft.com",
     url="https://github.com/atbagga/aks-deploy-cli-extension",
     classifiers=CLASSIFIERS,
-    package_data={'azext_aks_deploy': ['azext_metadata.json']},
+    package_data={'azext_deploy_to_azure': ['azext_metadata.json']},
     packages=find_packages(exclude=["*.test", "*.test.*", "test.*", "test"]),
     include_package_data=True,
     install_requires=REQUIRES

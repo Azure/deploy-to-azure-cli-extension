@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from knack.log import get_logger
 from knack.util import CLIError
-from azext_aks_deploy.dev.common.utils import which
+from azext_deploy_to_azure.dev.common.utils import which
 
 logger = get_logger(__name__)
 

@@ -1,4 +1,4 @@
-[![Build Status](https://dev.azure.com/baggaatul24/AKS-deploy-extension/_apis/build/status/GitHubActions-CliExtension-CI?branchName=master)](https://dev.azure.com/baggaatul24/AKS-deploy-extension/_build/latest?definitionId=168&branchName=master)
+[![Build Status](https://dev.azure.com/deploy-to-azure-cli/deploy-to-azure-cli/_apis/build/status/Azure.deploy-to-azure-cli-extension?branchName=master)](https://dev.azure.com/deploy-to-azure-cli/deploy-to-azure-cli/_build/latest?definitionId=1&branchName=master)
 
 # Azure CLI extension for deploying to Azure using GitHub Actions
 

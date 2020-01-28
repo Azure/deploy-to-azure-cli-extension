@@ -6,7 +6,7 @@
 from azure.cli.core.commands import CliCommandType
 
 functionappops = CliCommandType(
-    operations_tmpl='azext_aks_deploy.dev.functionapp.up#{}'
+    operations_tmpl='azext_deploy_to_azure.dev.functionapp.up#{}'
 )
 
 
