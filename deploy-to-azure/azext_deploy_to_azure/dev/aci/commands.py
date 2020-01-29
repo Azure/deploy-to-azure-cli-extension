@@ -11,5 +11,5 @@ aciops = CliCommandType(
 
 
 def load_aci_commands(self, _):
-    with self.command_group('aci') as g:
+    with self.command_group('aci', command_type=aciops) as g:
         g.command('up', 'aci_up')

@@ -140,5 +140,5 @@ jobs:
           with:
             azcliversion: 2.0.77
             inlineScript: |
-              az container create --resource-group resource_name_place_holder --name app_name_place_holder --image container_registry_name_place_holder.azurecr.io/app_name_place_holder:${{ github.sha }} --ports 80 port_number_place_holder --dns-name-label app_name_place_holder --registry-username ${{ SECRETS.REGISTRY_USERNAME }} --registry-password ${{ SECRETS.REGISTRY_PASSWORD }}""" 
-              
+              az container create --resource-group resource_name_place_holder --name app_name_place_holder --image container_registry_name_place_holder.azurecr.io/app_name_place_holder:${{ github.sha }} --ports 80 port_number_place_holder --dns-name-label app_name_place_holder --registry-username ${{ SECRETS.REGISTRY_USERNAME }} --registry-password ${{ SECRETS.REGISTRY_PASSWORD }}"""
+                            
