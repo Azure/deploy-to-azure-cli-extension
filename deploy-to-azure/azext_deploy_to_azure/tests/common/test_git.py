@@ -10,7 +10,7 @@ try:
 except ImportError:
     # Attempt to load mock (works on Python version below 3.3)
     from mock import patch
-from azext_aks_deploy.dev.common.git import is_github_url_candidate
+from azext_deploy_to_azure.dev.common.git import is_github_url_candidate
 
 
 class TestGitMethods(unittest.TestCase):
