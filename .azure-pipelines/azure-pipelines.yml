@@ -66,3 +66,22 @@ jobs:
       targetType: 'filePath'
       filePath: 'scripts/runStyleCheck.ps1'
 
+
+- job: 'Run_Test_Ubuntu'
+  dependsOn : Build_Publish_Azure_CLI_Test_SDK
+  pool:
+    vmImage: 'Ubuntu-16.04'
+  strategy:
+    matrix:
+      Python37:
+        python.version: '3.7.x'
+      PythonLatest:
+        python.version: '3.x'
+    maxParallel: 3
+
+  steps:
+  - bash: sudo rm -R -f /usr/local/lib/azureExtensionDir
+
+  - template: templates/run-tests.yml
+    parameters:
+      pythonVersion: '$(python.version)' 

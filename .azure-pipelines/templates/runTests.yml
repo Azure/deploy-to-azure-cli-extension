@@ -1,0 +1,38 @@
+parameters:
+  pythonVersion: ''
+  runOnlyRecordedTests: 'false'
+  runWithAzureCliReleased: 'false'
+
+steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: ${{ parameters.pythonVersion }}
+      architecture: 'x64'
+
+  - ${{ if eq(parameters.runWithAzureCliReleased, 'false') }}:
+    - template: install-azure-cli-edge.yml
+
+  - ${{ if eq(parameters.runWithAzureCliReleased, 'true') }}:
+    - template: install-azure-cli-released.yml
+
+  - template: download-install-local-azure-test-sdk.yml
+
+  - template: setup-ci-machine.yml
+
+  - template: download-install-local-deploy-to-azure-cli-extension.yml
+
+  - ${{ if eq(parameters.runOnlyRecordedTests, 'false') }}:
+    - script: pytest --junitxml "TEST-results.xml"
+      displayName: 'Run Tests'
+
+  - ${{ if eq(parameters.runOnlyRecordedTests, 'true') }}:
+    - script: pytest tests --junitxml "TEST-results.xml"
+      displayName: 'Run Tests'
+
+  - task: PublishTestResults@2
+    displayName: 'Publish Test Results'
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '**TEST-*.xml'
+      searchFolder: '$(System.DefaultWorkingDirectory)'
+    condition: succeededOrFailed() 
