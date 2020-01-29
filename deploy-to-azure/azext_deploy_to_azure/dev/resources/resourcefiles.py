@@ -118,7 +118,7 @@ jobs:
         steps:
         - name: 'Checkout GitHub Action'
           uses: actions/checkout@master
-        
+
         - name: 'Login via Azure CLI'
           uses: Azure/docker-login@v1
           with:
@@ -134,10 +134,11 @@ jobs:
           uses: azure/login@v1
           with:
             creds: ${{ SECRETS.AZURE_CREDENTIALS }}
-        
+
         - name: 'Deploy to Azure Container Instances'
           uses: azure/CLI@v1
-          with: 
+          with:
             azcliversion: 2.0.77
             inlineScript: |
               az container create --resource-group resource_name_place_holder --name app_name_place_holder --image container_registry_name_place_holder.azurecr.io/app_name_place_holder:${{ github.sha }} --ports 80 port_number_place_holder --dns-name-label app_name_place_holder --registry-username ${{ SECRETS.REGISTRY_USERNAME }} --registry-password ${{ SECRETS.REGISTRY_PASSWORD }}""" 
+              
