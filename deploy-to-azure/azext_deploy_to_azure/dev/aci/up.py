@@ -8,10 +8,10 @@ from knack.log import get_logger
 from knack.prompting import prompt
 
 from azext_deploy_to_azure.dev.common.git import resolve_repository
-from azext_deploy_to_azure.dev.common.github_api_helper import (Files, get_work_flow_check_runID, 
-                                                                push_files_to_repository, 
+from azext_deploy_to_azure.dev.common.github_api_helper import (Files, get_work_flow_check_runID,
+                                                                push_files_to_repository,
                                                                 get_languages_for_repo,
-                                                                get_github_pat_token, 
+                                                                get_github_pat_token,
                                                                 get_default_branch,
                                                                 check_file_exists)
 from azext_deploy_to_azure.dev.common.github_workflow_helper import poll_workflow_status, get_new_workflow_yaml_name
@@ -24,11 +24,10 @@ from azext_deploy_to_azure.dev.aks.docker_helm_template import get_docker_templa
 logger = get_logger(__name__)
 aci_token_prefix = "AciUpCLIExt_"
 
-#TODO: Use the ACI Deploy Action when Published
 
 # pylint: disable=too-many-statements
 def aci_up(acr=None, repository=None, port=None, branch_name=None,
-            skip_secrets_generation=False, do_not_wait=False):
+           skip_secrets_generation=False, do_not_wait=False):
     """Build and Deploy to Azure Container Instances using GitHub Actions
     :param acr: Name of the Azure Container Registry to be used for pushing the image
     :type acr: string
@@ -43,6 +42,7 @@ def aci_up(acr=None, repository=None, port=None, branch_name=None,
     :param do_not_wait: Do not wait for Workflow Completion
     :type do_not_wait: bool
     """
+    # TODO: Use the ACI Deploy Action when Published
     repo_name, repository = resolve_repository(repository)
 
     get_github_pat_token(token_prefix=aci_token_prefix + repo_name, display_warning=True)
@@ -53,9 +53,9 @@ def aci_up(acr=None, repository=None, port=None, branch_name=None,
 
     language = choose_supported_language(languages)
     if language:
-        logger.warning('%s Repository Detected.',language)
+        logger.warning('%s Repository Detected.', language)
     else:
-        logger.debug('Languages detected: %s',languages)
+        logger.debug('Languages detected: %s', languages)
         raise CLIError("The language in this repository are not yet supported from up command.")
 
     from azext_deploy_to_azure.dev.common.azure_cli_resources import get_acr_details
@@ -72,12 +72,12 @@ def aci_up(acr=None, repository=None, port=None, branch_name=None,
         if docker_files:
             files = files + docker_files
     else:
-        logger.warning('Using the Dockerfile found in repository %s',repo_name)
-    
+        logger.warning('Using the Dockerfile found in repository %s', repo_name)
+
     # create Azure Service Principal and display JSON on the screen for the user to configure it as GitHub Secrets
     if not skip_secrets_generation:
         get_azure_credentials()
-    
+
     print('')
     workflow_files = get_yaml_template_for_repo(acr_details, repo_name, port)
     if workflow_files:
@@ -86,8 +86,8 @@ def aci_up(acr=None, repository=None, port=None, branch_name=None,
     # File checkin
     for file_name in files:
         logger.debug("Checkin file path: %s", file_name.path)
-        logger.debug("Checkin file content: %s",file_name.content)
-        
+        logger.debug("Checkin file content: %s", file_name.content)
+
     default_branch = get_default_branch(repo_name)
     workflow_commit_sha = push_files_to_repository(
         repo_name=repo_name, default_branch=default_branch, files=files,
@@ -96,7 +96,7 @@ def aci_up(acr=None, repository=None, port=None, branch_name=None,
     if workflow_commit_sha:
         print('Creating workflow...')
         check_run_id = get_work_flow_check_runID(repo_name, workflow_commit_sha)
-        workflow_url = 'https://github.com/{repo_id}/runs/{checkID}'.format(repo_id=repo_name, 
+        workflow_url = 'https://github.com/{repo_id}/runs/{checkID}'.format(repo_id=repo_name,
                                                                             checkID=check_run_id)
         print('GitHub Action Workflow has been created - {}'.format(workflow_url))
 
@@ -105,8 +105,9 @@ def aci_up(acr=None, repository=None, port=None, branch_name=None,
             list_name = repo_name.split("/")
             app_name = list_name[1].lower()
             app_url = get_app_url(acr_details, app_name)
-            app_url_with_port = app_url+":"+port+"/"
-            print('Your app is deployed at: ',app_url_with_port)
+            app_url_with_port = app_url + ":" + port + "/"
+            print('Your app is deployed at: ', app_url_with_port)
+
 
 def choose_supported_language(languages):
     # check if one of top three languages are supported or not
@@ -119,6 +120,7 @@ def choose_supported_language(languages):
     if len(list_languages) >= 2 and list_languages[2] in ('JavaScript', 'Java', 'Python'):
         return list_languages[2]
     return None
+
 
 def get_yaml_template_for_repo(acr_details, repo_name, port):
     files_to_return = []
@@ -139,6 +141,7 @@ def get_yaml_template_for_repo(acr_details, repo_name, port):
                                  .replace(PORT_NUMBER_PLACEHOLDER, port)))
     return files_to_return
 
+
 def get_app_url(acr_details, app_name):
     import subprocess as sb
     resource_group = acr_details['resourceGroup']
@@ -147,5 +150,5 @@ def get_app_url(acr_details, app_name):
             --query ipAddress.fqdn'.format(app_name=app_name, resource_group_name=resource_group)
     url_result = sb.check_output(url_find_command, shell=True)
     url_result = url_result.decode().strip().lstrip('\"').rstrip('\"')
-    app_url = "http://"+url_result
+    app_url = "http://" + url_result
     return app_url
