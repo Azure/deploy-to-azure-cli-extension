@@ -100,7 +100,7 @@ def aci_up(acr=None, repository=None, port=None, branch_name=None,
                                                                             checkID=check_run_id)
         print('GitHub Action Workflow has been created - {}'.format(workflow_url))
 
-        if do_not_wait:
+        if not do_not_wait:
             poll_workflow_status(repo_name, check_run_id)
             list_name = repo_name.split("/")
             app_name = list_name[1].lower()
