@@ -1,0 +1,4 @@
+urllib3==1.23
+requests==2.22.0
+colorama==0.4.1
+humanfriendly==4.7
