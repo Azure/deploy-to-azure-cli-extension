@@ -17,6 +17,7 @@ RELEASE_NAME = 'aksappupdemo'
 # Checkin message strings
 
 CHECKIN_MESSAGE_AKS = 'Setting up AKS deployment workflow'
+CHECKIN_MESSAGE_ACI = 'Setting up ACI deployment workflow'
 CHECKIN_MESSAGE_FUNCTIONAPP = 'Setting up Functionapp deployment workflow'
 
 RELEASE_PLACEHOLDER = 'release_name_place_holder'
