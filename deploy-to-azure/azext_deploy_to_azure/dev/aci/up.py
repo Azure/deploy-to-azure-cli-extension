@@ -5,7 +5,6 @@
 
 from knack.util import CLIError
 from knack.log import get_logger
-from knack.prompting import prompt
 
 from azext_deploy_to_azure.dev.common.git import resolve_repository
 from azext_deploy_to_azure.dev.common.github_api_helper import (Files, get_work_flow_check_runID,
@@ -16,7 +15,7 @@ from azext_deploy_to_azure.dev.common.github_api_helper import (Files, get_work_
                                                                 check_file_exists)
 from azext_deploy_to_azure.dev.common.github_workflow_helper import poll_workflow_status, get_new_workflow_yaml_name
 from azext_deploy_to_azure.dev.common.github_azure_secrets import get_azure_credentials
-from azext_deploy_to_azure.dev.common.const import (CHECKIN_MESSAGE_ACI, APP_NAME_DEFAULT, APP_NAME_PLACEHOLDER,
+from azext_deploy_to_azure.dev.common.const import (CHECKIN_MESSAGE_ACI, APP_NAME_PLACEHOLDER,
                                                     ACR_PLACEHOLDER, RG_PLACEHOLDER, PORT_NUMBER_DEFAULT,
                                                     PORT_NUMBER_PLACEHOLDER)
 from azext_deploy_to_azure.dev.aks.docker_helm_template import get_docker_templates
@@ -128,14 +127,14 @@ def get_yaml_template_for_repo(acr_details, repo_name, port):
     yaml_file_name = 'main.yml'
     workflow_yaml = github_workflow_path + yaml_file_name
     list_name = repo_name.split("/")
-    APP_NAME_DEFAULT = list_name[1].lower()
+    app_name = list_name[1].lower()
     if check_file_exists(repo_name, workflow_yaml):
         yaml_file_name = get_new_workflow_yaml_name()
         workflow_yaml = github_workflow_path + yaml_file_name
     from azext_deploy_to_azure.dev.resources.resourcefiles import DEPLOY_TO_ACI_TEMPLATE
     files_to_return.append(Files(path=workflow_yaml,
                                  content=DEPLOY_TO_ACI_TEMPLATE
-                                 .replace(APP_NAME_PLACEHOLDER, APP_NAME_DEFAULT)
+                                 .replace(APP_NAME_PLACEHOLDER, app_name)
                                  .replace(ACR_PLACEHOLDER, acr_details['name'])
                                  .replace(RG_PLACEHOLDER, acr_details['resourceGroup'])
                                  .replace(PORT_NUMBER_PLACEHOLDER, port)))
