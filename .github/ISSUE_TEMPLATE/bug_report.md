@@ -20,7 +20,7 @@ deploy-to-azure extension version:
 Use az --version
 Look for something like-
 Extensions:
-deploy-to-azure (0.16.0)
+deploy-to-azure (0.1.0)
 
 Steps to reproduce the behavior:
 1. login using az login
