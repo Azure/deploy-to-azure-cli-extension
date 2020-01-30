@@ -25,6 +25,11 @@ jobs:
   - template: templates/setup-ci-machine.yml
 
   - template: templates/build-publish-deploy-to-azure-cli-extension.yml
+  - task: ComponentGovernanceComponentDetection@0
+    inputs:
+      scanType: 'Register'
+      verbosity: 'Verbose'
+      alertWarningLevel: 'High'
 
 
 - job: 'Build_Publish_Azure_CLI_Test_SDK'
