@@ -7,6 +7,7 @@ from knack.log import get_logger
 from knack.prompting import prompt
 from azext_deploy_to_azure.dev.common.prompting import prompt_user_friendly_choice_list
 from azext_deploy_to_azure.dev.common.azure_cli_resources import get_default_subscription_info
+from azext_deploy_to_azure.dev.common.github_api_helper import check_secret_exists, create_repo_secret
 
 logger = get_logger(__name__)
 
@@ -47,6 +48,10 @@ def get_azure_credentials():
             'Have you copied the name and value for AZURE_CREDENTIALS, REGISTRY_USERNAME and REGISTRY_PASSWORD:',
             user_choice_list)
 
+def configure_azure_secrets(repo_name):
+    if not check_secret_exists(repo_name,'AZURE_SECRET_NAME'):
+        create_repo_secret(repo_name,'AZURE_SECRET_NAME','some new secret')
+    
 
 def get_azure_credentials_functionapp(app_name):
     import subprocess

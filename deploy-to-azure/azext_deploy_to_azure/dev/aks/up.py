@@ -14,7 +14,8 @@ from azext_deploy_to_azure.dev.common.github_api_helper import (Files, get_work_
                                                                 get_default_branch,
                                                                 check_file_exists)
 from azext_deploy_to_azure.dev.common.github_workflow_helper import poll_workflow_status, get_new_workflow_yaml_name
-from azext_deploy_to_azure.dev.common.github_azure_secrets import get_azure_credentials
+from azure.cli.core import telemetry as telemetry_core
+from azext_deploy_to_azure.dev.common.github_azure_secrets import configure_azure_secrets
 from azext_deploy_to_azure.dev.common.kubectl import get_deployment_IP_port
 from azext_deploy_to_azure.dev.common.const import (CHECKIN_MESSAGE_AKS, APP_NAME_DEFAULT, APP_NAME_PLACEHOLDER,
                                                     ACR_PLACEHOLDER, RG_PLACEHOLDER, PORT_NUMBER_DEFAULT,
@@ -24,6 +25,18 @@ from azext_deploy_to_azure.dev.aks.docker_helm_template import get_docker_templa
 logger = get_logger(__name__)
 aks_token_prefix = "AksAppUpCLIExt_"
 
+AKS_UP_EXTENSION_PREFIX = 'Context.Default.Extension.DeployToAzure.'
+
+def set_custom_properties(prop, name, value):
+    if name and value is not None:
+        # 10 characters limit for strings
+        prop['{}{}'.format(AKS_UP_EXTENSION_PREFIX, name)] = value[:50] if isinstance(value, str) else value
+
+
+def process_request(name, value):
+    properties = {}
+    set_custom_properties(properties, name, value)
+    telemetry_core.add_extension_event('deploytoazure', properties)
 
 # pylint: disable=too-many-statements
 def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_name=None,
@@ -55,6 +68,7 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
     language = choose_supported_language(languages)
     if language:
         logger.warning('%s repository detected.', language)
+        process_request('Feedback', language)
     else:
         logger.debug('Languages detected : %s', languages)
         raise CLIError('The languages in this repository are not yet supported from up command.')
@@ -85,9 +99,11 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
         if helm_charts:
             files = files + helm_charts
 
+    import pdb
+    pdb.set_trace()
     # create azure service principal and display json on the screen for user to configure it as Github secrets
     if not skip_secrets_generation:
-        get_azure_credentials()
+        configure_azure_secrets(repo_name)
 
     print('')
     workflow_files = get_yaml_template_for_repo(cluster_details, acr_details, repo_name)
