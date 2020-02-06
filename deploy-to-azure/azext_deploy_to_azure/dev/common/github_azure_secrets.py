@@ -25,7 +25,7 @@ def get_azure_credentials(repo_name):
     print('')
     print('Creating REGISTRY_USERNAME and REGISTRY_PASSWORD...')
     if not check_secret_exists(repo_name, 'REGISTRY_USERNAME') \
-        and not check_secret_exists(repo_name, 'REGISTRY_PASSWORD'):
+                               and not check_secret_exists(repo_name, 'REGISTRY_PASSWORD'):
         sp_details = subprocess.check_output('az ad sp create-for-rbac -o json', shell=True)
         sp_details_json = json.loads(sp_details)
         create_repo_secret(repo_name, 'REGISTRY_USERNAME', sp_details_json['appId'])
