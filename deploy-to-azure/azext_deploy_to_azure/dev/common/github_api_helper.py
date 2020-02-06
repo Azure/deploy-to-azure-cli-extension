@@ -302,6 +302,7 @@ def check_secret_exists(repo, secret_name):
         return True
     return False
 
+
 def create_repo_secret(repo, secret_name, secret_value):
     """
     API Documentation - https://developer.github.com/v3/actions/secrets/#create-or-update-a-secret-for-a-repository
