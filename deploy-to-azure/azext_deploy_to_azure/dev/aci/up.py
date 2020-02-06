@@ -26,7 +26,7 @@ aci_token_prefix = "AciUpCLIExt_"
 
 # pylint: disable=too-many-statements
 def aci_up(acr=None, repository=None, port=None, branch_name=None,
-           skip_secrets_generation=False, do_not_wait=False):
+           do_not_wait=False):
     """Build and Deploy to Azure Container Instances using GitHub Actions
     :param acr: Name of the Azure Container Registry to be used for pushing the image
     :type acr: string
@@ -36,8 +36,6 @@ def aci_up(acr=None, repository=None, port=None, branch_name=None,
     :type port: str
     :param branch_name: New Branch Name to be created to check in files and raise a PR
     :type branch_name: str
-    :param skip_secrets_generation: Skip Generation of Azure Credentials
-    :type skip_secrets_generation: bool
     :param do_not_wait: Do not wait for Workflow Completion
     :type do_not_wait: bool
     """
@@ -74,8 +72,7 @@ def aci_up(acr=None, repository=None, port=None, branch_name=None,
         logger.warning('Using the Dockerfile found in repository %s', repo_name)
 
     # create Azure Service Principal and display JSON on the screen for the user to configure it as GitHub Secrets
-    if not skip_secrets_generation:
-        get_azure_credentials()
+    get_azure_credentials(repo_name)
 
     print('')
     workflow_files = get_yaml_template_for_repo(acr_details, repo_name, port)

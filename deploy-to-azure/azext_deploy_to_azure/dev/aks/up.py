@@ -14,7 +14,6 @@ from azext_deploy_to_azure.dev.common.github_api_helper import (Files, get_work_
                                                                 get_default_branch,
                                                                 check_file_exists)
 from azext_deploy_to_azure.dev.common.github_workflow_helper import poll_workflow_status, get_new_workflow_yaml_name
-
 from azext_deploy_to_azure.dev.common.github_azure_secrets import get_azure_credentials
 from azext_deploy_to_azure.dev.common.kubectl import get_deployment_IP_port
 from azext_deploy_to_azure.dev.common.const import (CHECKIN_MESSAGE_AKS, APP_NAME_DEFAULT, APP_NAME_PLACEHOLDER,
