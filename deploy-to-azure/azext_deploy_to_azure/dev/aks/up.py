@@ -15,7 +15,7 @@ from azext_deploy_to_azure.dev.common.github_api_helper import (Files, get_work_
                                                                 check_file_exists)
 from azext_deploy_to_azure.dev.common.github_workflow_helper import poll_workflow_status, get_new_workflow_yaml_name
 
-from azext_deploy_to_azure.dev.common.github_azure_secrets import configure_azure_secrets
+from azext_deploy_to_azure.dev.common.github_azure_secrets import get_azure_credentials
 from azext_deploy_to_azure.dev.common.kubectl import get_deployment_IP_port
 from azext_deploy_to_azure.dev.common.const import (CHECKIN_MESSAGE_AKS, APP_NAME_DEFAULT, APP_NAME_PLACEHOLDER,
                                                     ACR_PLACEHOLDER, RG_PLACEHOLDER, PORT_NUMBER_DEFAULT,
@@ -29,7 +29,7 @@ aks_token_prefix = "AksAppUpCLIExt_"
 
 # pylint: disable=too-many-statements
 def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_name=None,
-               skip_secrets_generation=False, do_not_wait=False):
+               do_not_wait=False):
     """Build and Deploy to AKS via GitHub actions
     :param aks_cluster: Name of the cluster to select for deployment.
     :type aks_cluster: str
@@ -41,8 +41,6 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
     :type port:str
     :param branch_name: New branch name to be created to check in files and raise a PR
     :type branch_name:str
-    :param skip_secrets_generation : Skip generation of Azure credentials.
-    :type skip_secrets_generation: bool
     :param do_not_wait : Do not wait for workflow completion.
     :type do_not_wait bool
     """
@@ -88,8 +86,7 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
             files = files + helm_charts
 
     # create azure service principal and display json on the screen for user to configure it as Github secrets
-    if not skip_secrets_generation:
-        configure_azure_secrets(repo_name)
+    get_azure_credentials(repo_name)
 
     print('')
     workflow_files = get_yaml_template_for_repo(cluster_details, acr_details, repo_name)

@@ -309,13 +309,11 @@ def create_repo_secret(repo, secret_name, secret_value):
     token = get_github_pat_token(repo)
     headers = get_application_json_header()
     key_details = get_public_key(repo)
-    import base64
-    #encoded_content = base64.b64encode(secret_value.encode('utf-8')).decode("utf-8")
-    encrypted_secret = encryptSecret(key_details['key'], secret_value)
-    encoded_content = base64.b64encode(encrypted_secret.encode('utf-8')).decode("utf-8")
-    #encoded_content = encrypted_secret.decode("utf-8")
+    encrypted_text = encrypt_secret(key_details['key'], secret_value)
+    # Remove the additional new lines added by encoder
+    encrypted_text = encrypted_text.replace('\n', '')
     create_secre_request_body = {
-        "encrypted_value": encoded_content,
+        "encrypted_value": encrypted_text,
         "key_id": key_details['key_id']
     }
     create_secrets_url = 'https://api.github.com/repos/{repo}/actions/secrets/{secret_name}'.format(
@@ -335,7 +333,7 @@ def get_public_key(repo):
     return key_details
 
 
-def encryptSecret(public_key, secret_value):
+def encrypt_secret(public_key, secret_value):
     """Encrypt a Unicode string using the public key."""
     from base64 import encodebytes
     from nacl import encoding, public

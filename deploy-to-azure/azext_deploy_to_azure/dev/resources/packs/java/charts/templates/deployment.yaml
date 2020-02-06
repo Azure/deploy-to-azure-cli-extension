@@ -3,14 +3,14 @@ kind: Deployment
 metadata:
   name: {{ template "fullname" . }}
   labels:
-    aksappup: {{ default "aks-app-up"  }}
+    aksup: {{ default "aks-up-app"  }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
 spec:
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
       labels:
-        aksappup: {{ default "aks-app-up"  }}
+        aksup: {{ default "aks-up-app"  }}
         app: {{ template "fullname" . }}
     spec:
       containers:
