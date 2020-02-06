@@ -25,7 +25,6 @@ logger = get_logger(__name__)
 aks_token_prefix = "AksAppUpCLIExt_"
 
 
-
 # pylint: disable=too-many-statements
 def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_name=None,
                do_not_wait=False):
