@@ -71,7 +71,9 @@ class GithubCredentialManager():
             logger.warning('Name: %s', note)
             logger.warning('You can revoke this from your GitHub settings if the pipeline is no longer required.')
             logger.warning('Go to GitHub Settings: https://github.com/settings to manage your PAT Tokens.')
-            logger.warning('You can learn more about PAT Tokens at: https://github.blog/2013-05-16-personal-api-tokens')
+            logger.warning('You can learn more about PAT Tokens at: '
+                           'https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-'
+                           'token-for-the-command-line')
             print('')
             self.token = response_json['token']
         else:
