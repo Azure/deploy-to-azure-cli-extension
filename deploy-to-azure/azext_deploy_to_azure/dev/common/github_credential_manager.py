@@ -70,7 +70,7 @@ class GithubCredentialManager():
             logger.warning('Created new personal access token with scopes - repo, user.')
             logger.warning('Name: %s', note)
             logger.warning('You can revoke this from your GitHub settings if the pipeline is no longer required.')
-            logger.warning('Go to GitHub Settings: https://github.com/settings to manage your PAT Tokens.')
+            logger.warning('Go to GitHub Settings: https://github.com/settings/tokens to manage your PAT Tokens.')
             logger.warning('You can learn more about PAT Tokens at: '
                            'https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-'
                            'token-for-the-command-line')
