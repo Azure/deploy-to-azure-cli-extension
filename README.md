@@ -7,7 +7,7 @@ The Deploy to Azure extension alleviates developer pain in building workflows th
 
 ## Installing the extension
 The Deploy to Azure is distributed as an extension to [Azure CLI](https://docs.microsoft.com/cli/azure/what-is-azure-cli?view=azure-cli-latest). Follow the steps given below to install the extension.
-1. [Install Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest) . You must have at least `v2.0.60`, whcih you can verify with `az --version` command.
+1. [Install Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest) . You must have at least `v2.0.60`, which you can verify with `az --version` command.
 2. Add Deploy to Azure extension by running the command  
 `az extension add --name deploy-to-azure`
 
