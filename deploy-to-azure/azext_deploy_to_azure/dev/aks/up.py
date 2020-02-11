@@ -27,7 +27,7 @@ aks_token_prefix = "AksAppUpCLIExt_"
 
 # pylint: disable=too-many-statements
 def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_name=None,
-               skip_secrets_generation=False, do_not_wait=False):
+               do_not_wait=False):
     """Build and Deploy to AKS via GitHub actions
     :param aks_cluster: Name of the cluster to select for deployment.
     :type aks_cluster: str
@@ -39,8 +39,6 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
     :type port:str
     :param branch_name: New branch name to be created to check in files and raise a PR
     :type branch_name:str
-    :param skip_secrets_generation : Skip generation of Azure credentials.
-    :type skip_secrets_generation: bool
     :param do_not_wait : Do not wait for workflow completion.
     :type do_not_wait bool
     """
@@ -86,8 +84,7 @@ def aks_deploy(aks_cluster=None, acr=None, repository=None, port=None, branch_na
             files = files + helm_charts
 
     # create azure service principal and display json on the screen for user to configure it as Github secrets
-    if not skip_secrets_generation:
-        get_azure_credentials()
+    get_azure_credentials(repo_name)
 
     print('')
     workflow_files = get_yaml_template_for_repo(cluster_details, acr_details, repo_name)

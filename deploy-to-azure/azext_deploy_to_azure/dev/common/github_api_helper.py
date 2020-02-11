@@ -288,3 +288,57 @@ def push_files_to_repository(repo_name, default_branch, files, branch_name, mess
     return push_files_github(
         files=files, repo_name=repo_name, branch=default_branch, commit_to_branch=commit_direct_to_branch,
         message=message, branch_name=branch_name)
+
+
+def check_secret_exists(repo, secret_name):
+    """
+    API Documentation - https://developer.github.com/v3/actions/secrets/#get-a-secret
+    """
+    token = get_github_pat_token(repo)
+    get_secret_url = 'https://api.github.com/repos/{repo}/actions/secrets/{name}'.format(repo=repo, name=secret_name)
+    get_response = requests.get(get_secret_url, auth=('', token))
+    # secret doesn't exists
+    if get_response.status_code == _HTTP_SUCCESS_STATUS:
+        return True
+    return False
+
+
+def create_repo_secret(repo, secret_name, secret_value):
+    """
+    API Documentation - https://developer.github.com/v3/actions/secrets/#create-or-update-a-secret-for-a-repository
+    """
+    token = get_github_pat_token(repo)
+    headers = get_application_json_header()
+    key_details = get_public_key(repo)
+    encrypted_text = encrypt_secret(key_details['key'], secret_value)
+    # Remove the additional new lines added by encoder
+    encrypted_text = encrypted_text.replace('\n', '')
+    create_secre_request_body = {
+        "encrypted_value": encrypted_text,
+        "key_id": key_details['key_id']
+    }
+    create_secrets_url = 'https://api.github.com/repos/{repo}/actions/secrets/{secret_name}'.format(
+        repo=repo, secret_name=secret_name)
+    response = requests.put(create_secrets_url, auth=('', token), json=create_secre_request_body, headers=headers)
+    logger.debug(response.text)
+
+
+def get_public_key(repo):
+    """
+    API Documentation - https://developer.github.com/v3/actions/secrets/#get-your-public-key
+    """
+    token = get_github_pat_token(repo)
+    get_public_key_url = 'https://api.github.com/repos/{repo}/actions/secrets/public-key'.format(repo=repo)
+    get_response = requests.get(get_public_key_url, auth=('', token))
+    key_details = get_response.json()
+    return key_details
+
+
+def encrypt_secret(public_key, secret_value):
+    """Encrypt a Unicode string using the public key."""
+    from base64 import encodebytes
+    from nacl import encoding, public
+    public_key = public.PublicKey(public_key.encode("utf-8"), encoding.Base64Encoder())
+    sealed_box = public.SealedBox(public_key)
+    encrypted = sealed_box.encrypt(secret_value.encode("utf-8"))
+    return encodebytes(encrypted).decode("utf-8")

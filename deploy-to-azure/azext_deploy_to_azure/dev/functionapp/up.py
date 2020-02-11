@@ -20,7 +20,7 @@ logger = get_logger(__name__)
 functionapp_token_prefix = "FunctionAppUpCLIExt_"
 
 
-def functionapp_deploy(app_name=None, repository=None, skip_secrets_generation=False,
+def functionapp_deploy(app_name=None, repository=None,
                        branch_name=None, do_not_wait=False):
     """Setup GitHub Action to build and deploy to Azure FunctionApp
     :param repository: GitHub repository URL e.g. https://github.com/azure/azure-cli.
@@ -29,8 +29,6 @@ def functionapp_deploy(app_name=None, repository=None, skip_secrets_generation=F
     :type app_name: str
     :param branch_name: New branch name to be created to check in files and raise a PR
     :type branch_name:str
-    :param skip_secrets_generation : Flag to skip generating Azure credentials.
-    :type skip_secrets_generation: bool
     :param do_not_wait : Do not wait for workflow completion.
     :type do_not_wait bool
     """
@@ -59,8 +57,7 @@ def functionapp_deploy(app_name=None, repository=None, skip_secrets_generation=F
     app_name = app_details['name']
 
     # create azure service principal and display json on the screen for user to configure it as Github secrets
-    if not skip_secrets_generation:
-        get_azure_credentials_functionapp(app_name)
+    get_azure_credentials_functionapp(repo_name, app_name)
 
     print('')
     files = get_functionapp_yaml_template_for_repo(app_name, repo_name)
