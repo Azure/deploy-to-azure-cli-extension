@@ -3,7 +3,7 @@
 # Deploy to Azure using GitHub Actions
 [GitHub Actions](https://help.github.com/en/actions/automating-your-workflow-with-github-actions) provides a powerful execution environment integrated into every step of your workflow enabling you to combine and customize your workflow. You can use GitHub actions to build Continous Integration (CI) and deployment (CD) pipelines that target Azure. Developers who are looking to set up their CI-CD pipelines will have to acquire the actions, fill in the required parameters and set up the secrets, to execute the workflows. How about we do all of that for you with a single command?    
 
-The Deploy to Azure extension aims to alleviate the developer pain in building workflows that target Azure by abstracting away the configuration pain and reducing concept count.
+The Deploy to Azure extension alleviates developer pain in building workflows that target Azure by abstracting away the configuration pain and reducing concept count.
 
 ## Installing the extension
 The Deploy to Azure is distributed as an extension to [Azure CLI](https://docs.microsoft.com/cli/azure/what-is-azure-cli?view=azure-cli-latest). Follow the steps given below to install the extension.
@@ -46,7 +46,7 @@ The `az container app up` command builds the application container image, pushes
 If the CLI can open your default browser, it will do so and load a sign-in page. Otherwise, you need to open a browser page and follow the instructions on the command line to enter an authorization code after navigating to https://aka.ms/devicelogin in your browser. For more information, see the [Azure CLI login page](https://docs.microsoft.com/cli/azure/authenticate-azure-cli?view=azure-cli-latest).
 
 2. Run the command `az container app up` and provide the GitHub repository URL  
-`az aks app up -r https://github.com/contoso/samplerepo`  
+`az container app up -r https://github.com/contoso/samplerepo`  
 Alternatively, you can run the same command from within the local checkout of the repository and the repository URL will be inferred from the git context. If both are available, the command parameter takes precedence.
 
 3. Provide your GitHub credentials to generate a PAT token, which will be used to commit the configuration files. Alternatively, you can provide the PAT token directly as well.
