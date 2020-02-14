@@ -137,18 +137,18 @@ def get_language_to_workflow_mapping(language, platform):
         DEPLOY_TO_FUNCTIONAPP_DOTNET_LINUX_TEMPLATE)
 
     workflow_map = {
-        "linux" : {
-            "JavaScript":DEPLOY_TO_FUNCTIONAPP_NODE_LINUX_TEMPLATE,
-            "Python":DEPLOY_TO_FUNCTIONAPP_PYTHON_LINUX_TEMPLATE,
-            "PowerShell":"",
-            "Java":"",
-            "C#":DEPLOY_TO_FUNCTIONAPP_DOTNET_LINUX_TEMPLATE},
-        "windows" : {
-            "JavaScript":DEPLOY_TO_FUNCTIONAPP_NODE_WINDOWS_TEMPLATE,
-            "Python":"",
-            "PowerShell":DEPLOY_TO_FUNCTIONAPP_POWERSHELL_WINDOWS_TEMPLATE,
-            "Java":DEPLOY_TO_FUNCTIONAPP_JAVA_WINDOWS_TEMPLATE,
-            "C#":DEPLOY_TO_FUNCTIONAPP_DOTNET_WINDOWS_TEMPLATE}}
+        "linux": {
+            "JavaScript": DEPLOY_TO_FUNCTIONAPP_NODE_LINUX_TEMPLATE,
+            "Python": DEPLOY_TO_FUNCTIONAPP_PYTHON_LINUX_TEMPLATE,
+            "PowerShell": "",
+            "Java": "",
+            "C#": DEPLOY_TO_FUNCTIONAPP_DOTNET_LINUX_TEMPLATE},
+        "windows": {
+            "JavaScript": DEPLOY_TO_FUNCTIONAPP_NODE_WINDOWS_TEMPLATE,
+            "Python": "",
+            "PowerShell": DEPLOY_TO_FUNCTIONAPP_POWERSHELL_WINDOWS_TEMPLATE,
+            "Java": DEPLOY_TO_FUNCTIONAPP_JAVA_WINDOWS_TEMPLATE,
+            "C#": DEPLOY_TO_FUNCTIONAPP_DOTNET_WINDOWS_TEMPLATE}}
     if workflow_map[platform][language]:
         return workflow_map[platform][language]
     logger.debug("Language: %s, Platform: %s", language, platform)
