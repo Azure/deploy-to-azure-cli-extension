@@ -56,14 +56,9 @@ def create_acr(registry_name, resource_group, sku):
         raise CLIError(ex)
 
 
-def create_functionapp(_app_name, _resource_group, show_warning=True):
-    _subscription_id, subscription_name, _tenant_id, _environment_name = get_default_subscription_info()
-    if show_warning:
-        logger.warning('Using your default Azure subscription %s for creating new Azure Container Registry.',
-                       subscription_name)
-    #  Todo-atbagga
-    #  place holder function et to implement
-    return ""
+def create_functionapp(_app_name, _resource_group, _show_warning=True):
+    logger.warning("You can create a new functionapp using command - 'az functionapp create'\
+                    then try again.")
 
 
 def get_resource_group():
@@ -189,7 +184,7 @@ def get_functionapp_details(name=None):
                 logger.warning('Functionapp with the same name already exists. Using the existing app.')
                 app_details = app
         if not app_details:
-            app_details = create_functionapp(app_name, resource_group)
+            create_functionapp(app_name, resource_group)
     else:
         app_details = functionapp_list[functionapp_choice]
     return app_details
