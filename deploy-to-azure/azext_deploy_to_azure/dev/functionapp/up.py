@@ -113,8 +113,6 @@ def get_functionapp_yaml_template_for_repo(app_name, repo_name, language, platfo
 
 
 def choose_supported_language(languages):
-    import pdb
-    pdb.set_trace()
     # check if one of top three languages are supported or not
     list_languages = list(languages.keys())
     if list_languages and list_languages[0] in ('JavaScript', 'Java', 'Python', 'PowerShell', "C#"):
