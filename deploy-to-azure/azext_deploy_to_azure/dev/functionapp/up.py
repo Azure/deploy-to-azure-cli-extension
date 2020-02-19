@@ -48,19 +48,20 @@ def functionapp_deploy(app_name=None, repository=None,
         raise CLIError('The languages in this repository are not yet supported from up command.')
 
     # assuming the host.json is in the root directory for now
-    # Todo - atbagga
     ensure_function_app(repo_name=repo_name)
 
     from azext_deploy_to_azure.dev.common.azure_cli_resources import get_functionapp_details
     app_details = get_functionapp_details(app_name)
     logger.debug(app_details)
     app_name = app_details['name']
+    platform = "linux" if "linux" in app_details['kind'] else "windows"
+    default_host_name = app_details['defaultHostName']
 
     # create azure service principal and display json on the screen for user to configure it as Github secrets
     get_azure_credentials_functionapp(repo_name, app_name)
 
     print('')
-    files = get_functionapp_yaml_template_for_repo(app_name, repo_name)
+    files = get_functionapp_yaml_template_for_repo(app_name, repo_name, language, platform)
 
     # File checkin
     for file_name in files:
@@ -78,6 +79,7 @@ def functionapp_deploy(app_name=None, repository=None,
 
     if not do_not_wait:
         poll_workflow_status(repo_name, check_run_id)
+        print('Your app is deployed at: https://{}'.format(default_host_name))
 
 
 def ensure_function_app(repo_name, path=None):
@@ -91,7 +93,7 @@ def ensure_function_app(repo_name, path=None):
         raise CLIError('host.json could not be located at {}.'.format(path_to_host))
 
 
-def get_functionapp_yaml_template_for_repo(app_name, repo_name):
+def get_functionapp_yaml_template_for_repo(app_name, repo_name, language, platform):
     files_to_return = []
     github_workflow_path = '.github/workflows/'
     # Read template file
@@ -101,10 +103,9 @@ def get_functionapp_yaml_template_for_repo(app_name, repo_name):
         from azext_deploy_to_azure.dev.common.github_workflow_helper import get_new_workflow_yaml_name
         yaml_file_name = get_new_workflow_yaml_name()
         workflow_yaml = github_workflow_path + yaml_file_name
-    from azext_deploy_to_azure.dev.resources.resourcefiles import DEPLOY_TO_FUNCTIONAPP_TEMPLATE
     from azext_deploy_to_azure.dev.common.const import APP_NAME_PLACEHOLDER
     files_to_return.append(Files(path=workflow_yaml,
-                                 content=DEPLOY_TO_FUNCTIONAPP_TEMPLATE
+                                 content=get_language_to_workflow_mapping(language, platform)
                                  .replace(APP_NAME_PLACEHOLDER, app_name)))
     return files_to_return
 
@@ -112,10 +113,40 @@ def get_functionapp_yaml_template_for_repo(app_name, repo_name):
 def choose_supported_language(languages):
     # check if one of top three languages are supported or not
     list_languages = list(languages.keys())
-    if list_languages and list_languages[0] in ('JavaScript', 'Java', 'Python'):
+    if list_languages and list_languages[0] in ('JavaScript', 'Java', 'Python', 'PowerShell', "C#"):
         return list_languages[0]
-    if len(list_languages) >= 1 and list_languages[1] in ('JavaScript', 'Java', 'Python'):
+    if len(list_languages) >= 1 and list_languages[1] in ('JavaScript', 'Java', 'Python', 'PowerShell', "C#"):
         return list_languages[1]
-    if len(list_languages) >= 2 and list_languages[2] in ('JavaScript', 'Java', 'Python'):
+    if len(list_languages) >= 2 and list_languages[2] in ('JavaScript', 'Java', 'Python', 'PowerShell', "C#"):
         return list_languages[2]
     return None
+
+
+def get_language_to_workflow_mapping(language, platform):
+    from azext_deploy_to_azure.dev.resources.resourcefiles import (
+        DEPLOY_TO_FUNCTIONAPP_PYTHON_LINUX_TEMPLATE,
+        DEPLOY_TO_FUNCTIONAPP_NODE_WINDOWS_TEMPLATE,
+        DEPLOY_TO_FUNCTIONAPP_NODE_LINUX_TEMPLATE,
+        DEPLOY_TO_FUNCTIONAPP_POWERSHELL_WINDOWS_TEMPLATE,
+        DEPLOY_TO_FUNCTIONAPP_JAVA_WINDOWS_TEMPLATE,
+        DEPLOY_TO_FUNCTIONAPP_DOTNET_WINDOWS_TEMPLATE,
+        DEPLOY_TO_FUNCTIONAPP_DOTNET_LINUX_TEMPLATE)
+
+    workflow_map = {
+        "linux": {
+            "JavaScript": DEPLOY_TO_FUNCTIONAPP_NODE_LINUX_TEMPLATE,
+            "Python": DEPLOY_TO_FUNCTIONAPP_PYTHON_LINUX_TEMPLATE,
+            "PowerShell": "",
+            "Java": "",
+            "C#": DEPLOY_TO_FUNCTIONAPP_DOTNET_LINUX_TEMPLATE},
+        "windows": {
+            "JavaScript": DEPLOY_TO_FUNCTIONAPP_NODE_WINDOWS_TEMPLATE,
+            "Python": "",
+            "PowerShell": DEPLOY_TO_FUNCTIONAPP_POWERSHELL_WINDOWS_TEMPLATE,
+            "Java": DEPLOY_TO_FUNCTIONAPP_JAVA_WINDOWS_TEMPLATE,
+            "C#": DEPLOY_TO_FUNCTIONAPP_DOTNET_WINDOWS_TEMPLATE}}
+    if workflow_map[platform][language]:
+        return workflow_map[platform][language]
+    logger.debug("Language: %s, Platform: %s", language, platform)
+    raise CLIError("The selected repository language ({}) and Azure Functions platform ({}) are not supported.".format(
+        language, platform))

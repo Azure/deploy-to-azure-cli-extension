@@ -47,18 +47,43 @@ jobs:
           demo-k8s-secret"""
 
 
-DEPLOY_TO_FUNCTIONAPP_TEMPLATE = """# Action Requires
-# 1. Setup the AZURE_CREDENTIALS secrets in your GitHub Repository
-# 2. Replace app_name_place_holder with your Azure function app name
-# 3. Add this yaml file to your project's .github/workflows/
-# 4. Push your local project to your GitHub Repository
+DEPLOY_TO_ACI_TEMPLATE = """name: CI
+on: [push, pull_request]
 
-name: Linux_Python_Workflow
+jobs:
+    build-and-deploy:
+        runs-on: ubuntu-latest
+        steps:
+        - name: 'Checkout GitHub Action'
+          uses: actions/checkout@master
 
-on:
-  push:
-    branches:
-    - master
+        - name: 'Login via Azure CLI'
+          uses: Azure/docker-login@v1
+          with:
+              login-server: container_registry_name_place_holder.azurecr.io
+              username: ${{ SECRETS.REGISTRY_USERNAME }}
+              password: ${{ SECRETS.REGISTRY_PASSWORD }}
+
+        - run: |
+            docker build . -t container_registry_name_place_holder.azurecr.io/app_name_place_holder:${{ github.sha }}
+            docker push container_registry_name_place_holder.azurecr.io/app_name_place_holder:${{ github.sha }}
+
+        - name: 'Azure Login'
+          uses: azure/login@v1
+          with:
+            creds: ${{ SECRETS.AZURE_CREDENTIALS }}
+
+        - name: 'Deploy to Azure Container Instances'
+          uses: azure/CLI@v1
+          with:
+            azcliversion: 2.0.77
+            inlineScript: |
+              az container create --resource-group resource_name_place_holder --name app_name_place_holder --image container_registry_name_place_holder.azurecr.io/app_name_place_holder:${{ github.sha }} --ports 80 port_number_place_holder --dns-name-label app_name_place_holder --registry-username ${{ SECRETS.REGISTRY_USERNAME }} --registry-password ${{ SECRETS.REGISTRY_PASSWORD }}
+"""
+
+
+DEPLOY_TO_FUNCTIONAPP_PYTHON_LINUX_TEMPLATE = """name: Linux_Python_FunctionApp_CI
+on: [push, pull_request]
 
 jobs:
   build-and-deploy:
@@ -109,36 +134,317 @@ jobs:
 #   https://help.github.com/en/categories/automating-your-workflow-with-github-actions
 """
 
-DEPLOY_TO_ACI_TEMPLATE = """name: CI
+
+DEPLOY_TO_FUNCTIONAPP_NODE_WINDOWS_TEMPLATE = """name: Windows_Node_FunctionApp_CI
 on: [push, pull_request]
 
 jobs:
-    build-and-deploy:
-        runs-on: ubuntu-latest
-        steps:
-        - name: 'Checkout GitHub Action'
-          uses: actions/checkout@master
+  build-and-deploy:
+    runs-on: windows-latest
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@master
 
-        - name: 'Login via Azure CLI'
-          uses: Azure/docker-login@v1
-          with:
-              login-server: container_registry_name_place_holder.azurecr.io
-              username: ${{ SECRETS.REGISTRY_USERNAME }}
-              password: ${{ SECRETS.REGISTRY_PASSWORD }}
+    # If you want to use publish profile credentials instead of Azure Service Principal
+    # Please comment this 'Login via Azure CLI' block
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-        - run: |
-            docker build . -t container_registry_name_place_holder.azurecr.io/app_name_place_holder:${{ github.sha }}
-            docker push container_registry_name_place_holder.azurecr.io/app_name_place_holder:${{ github.sha }}
+    - name: Setup Node 10.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
 
-        - name: 'Azure Login'
-          uses: azure/login@v1
-          with:
-            creds: ${{ SECRETS.AZURE_CREDENTIALS }}
+    - name: 'Run npm'
+      shell: pwsh
+      run: |
+        # If your function app project is not located in your repository's root
+        # Please change your directory for npm in pushd
+        pushd .
+        npm install
+        npm run build --if-present
+        npm run test --if-present
+        popd
 
-        - name: 'Deploy to Azure Container Instances'
-          uses: azure/CLI@v1
-          with:
-            azcliversion: 2.0.77
-            inlineScript: |
-              az container create --resource-group resource_name_place_holder --name app_name_place_holder --image container_registry_name_place_holder.azurecr.io/app_name_place_holder:${{ github.sha }} --ports 80 port_number_place_holder --dns-name-label app_name_place_holder --registry-username ${{ SECRETS.REGISTRY_USERNAME }} --registry-password ${{ SECRETS.REGISTRY_PASSWORD }}
+    - name: 'Run Azure Functions Action'
+      uses: Azure/functions-action@v1
+      id: fa
+      with:
+        app-name: app_name_place_holder
+        # If your function app project is not located in your repository's root
+        # Please consider prefixing the project path in this package parameter
+        package: '.'
+        # If you want to use publish profile credentials instead of Azure Service Principal
+        # Please uncomment the following line
+        # publish-profile: ${{ secrets.SCM_CREDENTIALS }}
+
+    #- name: 'use the published functionapp url in upcoming steps'
+    #  run: |
+    #    echo "${{ steps.fa.outputs.app-url }}"
+
+# For more information on GitHub Actions:
+#   https://help.github.com/en/categories/automating-your-workflow-with-github-actions
+"""
+
+
+DEPLOY_TO_FUNCTIONAPP_NODE_LINUX_TEMPLATE = """name: Linux_Node_FunctionApp_CI
+on: [push, pull_request]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@master
+
+    # If you want to use publish profile credentials instead of Azure Service Principal
+    # Please comment this 'Login via Azure CLI' block
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Setup Node 10.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+
+    - name: 'Run npm'
+      shell: bash
+      run: |
+        # If your function app project is not located in your repository's root
+        # Please change your directory for npm in pushd
+        pushd .
+        npm install
+        npm run build --if-present
+        npm run test --if-present
+        popd
+
+    - name: 'Run Azure Functions Action'
+      uses: Azure/functions-action@v1
+      id: fa
+      with:
+        app-name: app_name_place_holder
+        # If your function app project is not located in your repository's root
+        # Please consider prefixing the project path in this package parameter
+        package: '.'
+        # If you want to use publish profile credentials instead of Azure Service Principal
+        # Please uncomment the following line
+        # publish-profile: ${{ secrets.SCM_CREDENTIALS }}
+
+    #- name: 'use the published functionapp url in upcoming steps'
+    #  run: |
+    #    echo "${{ steps.fa.outputs.app-url }}"
+
+# For more information on GitHub Actions:
+#   https://help.github.com/en/categories/automating-your-workflow-with-github-actions
+"""
+
+
+DEPLOY_TO_FUNCTIONAPP_POWERSHELL_WINDOWS_TEMPLATE = """name: Windows_PowerShell_FunctionApp_CI
+on: [push, pull_request]
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@master
+
+    # If you want to use publish profile credentials instead of Azure Service Principal
+    # Please comment this 'Login via Azure CLI' block
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: 'Run Azure Functions Action'
+      uses: Azure/functions-action@v1
+      id: fa
+      with:
+        app-name: app_name_place_holder
+        # If your function app project is not located in your repository's root
+        # Please consider prefixing the project path in this package parameter
+        package: '.'
+        # If you want to use publish profile credentials instead of Azure Service Principal
+        # Please uncomment the following line
+        # publish-profile: ${{ secrets.SCM_CREDENTIALS }}
+
+    #- name: 'use the published functionapp url in upcoming steps'
+    #  run: |
+    #    echo "${{ steps.fa.outputs.app-url }}"
+
+# For more information on GitHub Actions:
+#   https://help.github.com/en/categories/automating-your-workflow-with-github-actions
+"""
+
+
+DEPLOY_TO_FUNCTIONAPP_JAVA_WINDOWS_TEMPLATE = """
+# Action Requires
+# 1. Setup the AZURE_CREDENTIALS secrets in your GitHub Repository
+# 2. Replace PLEASE_REPLACE_THIS_WITH_YOUR_FUNCTION_APP_NAME with your Azure function app name
+# 3. Replace POM_ARTIFACT_ID with the value in project <artifactId> in pom.xml
+# 4. Replace POM_FUNCTION_APP_NAME with the value in properties <functionAppName> in pom.xml
+# 5. Add this yaml file to your project's .github/workflows/
+# 6. Push your local project to your GitHub Repository
+
+name: Windows_Java_FunctionApp_CI
+
+on: [push, pull_request]
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@master
+
+    # If you want to use publish profile credentials instead of Azure Service Principal
+    # Please comment this 'Login via Azure CLI' block
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Setup Java 1.8.x
+      uses: actions/setup-java@v1
+      with:
+        # If your pom.xml <maven.compiler.source> version is not in 1.8.x
+        # Please change the Java version to match the version in pom.xml <maven.compiler.source>
+        java-version: '1.8.x'
+
+    - name: 'Run mvn'
+      shell: pwsh
+      run: |
+        # If your function app project is not located in your repository's root
+        # Please change your directory for maven build in pushd
+        pushd ./POM_ARTIFACT_ID
+        mvn clean package
+        mvn azure-functions:package
+        popd
+
+    - name: 'Run Azure Functions Action'
+      uses: Azure/functions-action@v1
+      id: fa
+      with:
+        app-name: app_name_place_holder
+        # If your function app project is not located in your repository's root
+        # Please consider prefixing the project path in this package parameter
+        package: ./POM_ARTIFACT_ID/target/azure-functions/POM_FUNCTION_APP_NAME
+        # If you want to use publish profile credentials instead of Azure Service Principal
+        # Please uncomment the following line
+        # publish-profile: ${{ secrets.SCM_CREDENTIALS }}
+
+    #- name: 'use the published functionapp url in upcoming steps'
+    #  run: |
+    #    echo "${{ steps.fa.outputs.app-url }}"
+
+# For more information on GitHub Actions:
+#   https://help.github.com/en/categories/automating-your-workflow-with-github-actions
+"""
+
+
+DEPLOY_TO_FUNCTIONAPP_DOTNET_WINDOWS_TEMPLATE = """name: Windows_Dotnet_FunctionApp_CI
+on: [push, pull_request]
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@master
+
+    # If you want to use publish profile credentials instead of Azure Service Principal
+    # Please comment this 'Login via Azure CLI' block
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Setup Dotnet 2.2.300
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '2.2.300'
+
+    - name: 'Run dotnet'
+      shell: pwsh
+      run: |
+        # If your function app project is not located in your repository's root
+        # Please change your directory for dotnet build in pushd
+        pushd .
+        dotnet build --configuration Release --output ./output
+        popd
+
+    - name: 'Run Azure Functions Action'
+      uses: Azure/functions-action@v1
+      id: fa
+      with:
+        app-name: app_name_place_holder
+        # If your function app project is not located in your repository's root
+        # Please consider prefixing the project path in this package parameter
+        package: './output'
+        # If you want to use publish profile credentials instead of Azure Service Principal
+        # Please uncomment the following line
+        # publish-profile: ${{ secrets.SCM_CREDENTIALS }}
+
+    #- name: 'use the published functionapp url in upcoming steps'
+    #  run: |
+    #    echo "${{ steps.fa.outputs.app-url }}"
+
+# For more information on GitHub Actions:
+#   https://help.github.com/en/categories/automating-your-workflow-with-github-actions
+"""
+
+
+DEPLOY_TO_FUNCTIONAPP_DOTNET_LINUX_TEMPLATE = """name: Linux_Dotnet_FunctionApp_CI
+on: [push, pull_request]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@master
+
+    # If you want to use publish profile credentials instead of Azure Service Principal
+    # Please comment this 'Login via Azure CLI' block
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Setup Dotnet 2.2.300
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '2.2.300'
+
+    - name: 'Run dotnet build'
+      shell: bash
+      run: |
+        # If your function app project is not located in your repository's root
+        # Please consider using pushd to change your path
+        pushd .
+        dotnet build --configuration Release --output ./output
+        popd
+
+    - name: 'Run Azure Functions Action'
+      uses: Azure/functions-action@v1
+      id: fa
+      with:
+        app-name: app_name_place_holder
+        # If your function app project is not located in your repository's root
+        # Please consider prefixing the project path in this package parameter
+        package: './output'
+        # If you want to use publish profile credentials instead of Azure Service Principal
+        # Please uncomment the following line
+        # publish-profile: ${{ secrets.SCM_CREDENTIALS }}
+
+    #- name: 'use the published functionapp url in upcoming steps'
+    #  run: |
+    #    echo "${{ steps.fa.outputs.app-url }}"
+
+# For more information on GitHub Actions:
+#   https://help.github.com/en/categories/automating-your-workflow-with-github-actions
 """
