@@ -27,7 +27,6 @@ def functionapp_deploy(app_name=None, repository=None, skip_secrets_generation=F
     :type repository: str
     :param app_name: FunctionApp name in the subscription.
     :type app_name: str
-
     :param branch_name: New branch name to be created to check in files and raise a PR
     :type branch_name:str
     :param skip_secrets_generation : Flag to skip generating Azure credentials.
@@ -58,6 +57,7 @@ def functionapp_deploy(app_name=None, repository=None, skip_secrets_generation=F
     logger.debug(app_details)
     app_name = app_details['name']
     platform = "linux" if "linux" in app_details['kind'] else "windows"
+    default_host_name = app_details['defaultHostName']
 
     # create azure service principal and display json on the screen for user to configure it as Github secrets
     if not skip_secrets_generation:
@@ -82,6 +82,7 @@ def functionapp_deploy(app_name=None, repository=None, skip_secrets_generation=F
 
     if not do_not_wait:
         poll_workflow_status(repo_name, check_run_id)
+        print('Your app is deployed at: https://{}'.format(default_host_name))
 
 
 def ensure_function_app(repo_name, path=None):
@@ -150,4 +151,5 @@ def get_language_to_workflow_mapping(language, platform):
     if workflow_map[platform][language]:
         return workflow_map[platform][language]
     logger.debug("Language: %s, Platform: %s", language, platform)
-    raise CLIError("The selected repository language and Azure Functions platform are not supported.")
+    raise CLIError("The selected repository language ({}) and Azure Functions platform ({}) are not supported.".format(
+        language, platform))

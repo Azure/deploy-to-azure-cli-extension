@@ -82,12 +82,8 @@ jobs:
 """
 
 
-DEPLOY_TO_FUNCTIONAPP_PYTHON_LINUX_TEMPLATE = """name: Linux_Python_Workflow
-
-on:
-  push:
-    branches:
-    - master
+DEPLOY_TO_FUNCTIONAPP_PYTHON_LINUX_TEMPLATE = """name: Linux_Python_FunctionApp_CI
+on: [push, pull_request]
 
 jobs:
   build-and-deploy:
@@ -139,12 +135,8 @@ jobs:
 """
 
 
-DEPLOY_TO_FUNCTIONAPP_NODE_WINDOWS_TEMPLATE = """name: Windows_Node_Workflow
-
-on:
-  push:
-    branches:
-    - master
+DEPLOY_TO_FUNCTIONAPP_NODE_WINDOWS_TEMPLATE = """name: Windows_Node_FunctionApp_CI
+on: [push, pull_request]
 
 jobs:
   build-and-deploy:
@@ -197,12 +189,8 @@ jobs:
 """
 
 
-DEPLOY_TO_FUNCTIONAPP_NODE_LINUX_TEMPLATE = """name: Linux_Node_Workflow
-
-on:
-  push:
-    branches:
-    - master
+DEPLOY_TO_FUNCTIONAPP_NODE_LINUX_TEMPLATE = """name: Linux_Node_FunctionApp_CI
+on: [push, pull_request]
 
 jobs:
   build-and-deploy:
@@ -255,12 +243,8 @@ jobs:
 """
 
 
-DEPLOY_TO_FUNCTIONAPP_POWERSHELL_WINDOWS_TEMPLATE = """name: Windows_PowerShell_Workflow
-
-on:
-  push:
-    branches:
-    - master
+DEPLOY_TO_FUNCTIONAPP_POWERSHELL_WINDOWS_TEMPLATE = """name: Windows_PowerShell_FunctionApp_CI
+on: [push, pull_request]
 
 jobs:
   build-and-deploy:
@@ -306,12 +290,9 @@ DEPLOY_TO_FUNCTIONAPP_JAVA_WINDOWS_TEMPLATE = """
 # 5. Add this yaml file to your project's .github/workflows/
 # 6. Push your local project to your GitHub Repository
 
-name: Windows_Java_Workflow
+name: Windows_Java_FunctionApp_CI
 
-on:
-  push:
-    branches:
-    - master
+on: [push, pull_request]
 
 jobs:
   build-and-deploy:
@@ -365,12 +346,8 @@ jobs:
 """
 
 
-DEPLOY_TO_FUNCTIONAPP_DOTNET_WINDOWS_TEMPLATE = """name: Windows_Dotnet_Workflow
-
-on:
-  push:
-    branches:
-    - master
+DEPLOY_TO_FUNCTIONAPP_DOTNET_WINDOWS_TEMPLATE = """name: Windows_Dotnet_FunctionApp_CI
+on: [push, pull_request]
 
 jobs:
   build-and-deploy:
@@ -421,12 +398,8 @@ jobs:
 """
 
 
-DEPLOY_TO_FUNCTIONAPP_DOTNET_LINUX_TEMPLATE = """name: Linux_Dotnet_Workflow
-
-on:
-  push:
-    branches:
-    - master
+DEPLOY_TO_FUNCTIONAPP_DOTNET_LINUX_TEMPLATE = """name: Linux_Dotnet_FunctionApp_CI
+on: [push, pull_request]
 
 jobs:
   build-and-deploy:
