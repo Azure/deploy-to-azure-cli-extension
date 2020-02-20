@@ -88,7 +88,7 @@ def functionapp_deploy(app_name=None, repository=None,
 def get_params_for_language(language):
     params = {}
     if language == 'Java':
-        # todo to automate this 
+        # todo to automate this
         # It should be read from pom.xml
         return params
     return params
