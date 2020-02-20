@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from knack.log import get_logger
 from knack.util import CLIError
+from knack.prompting import prompt
 
 from azext_deploy_to_azure.dev.common.git import resolve_repository
 from azext_deploy_to_azure.dev.common.github_api_helper import (Files, get_work_flow_check_runID,
@@ -47,6 +48,8 @@ def functionapp_deploy(app_name=None, repository=None,
         logger.debug('Languages detected : %s', languages)
         raise CLIError('The languages in this repository are not yet supported from up command.')
 
+    params = get_params_for_language(language)
+
     # assuming the host.json is in the root directory for now
     ensure_function_app(repo_name=repo_name)
 
@@ -61,7 +64,7 @@ def functionapp_deploy(app_name=None, repository=None,
     get_azure_credentials_functionapp(repo_name, app_name)
 
     print('')
-    files = get_functionapp_yaml_template_for_repo(app_name, repo_name, language, platform)
+    files = get_functionapp_yaml_template_for_repo(app_name, repo_name, language, platform, params)
 
     # File checkin
     for file_name in files:
@@ -82,6 +85,15 @@ def functionapp_deploy(app_name=None, repository=None,
         print('Your app is deployed at: https://{}'.format(default_host_name))
 
 
+def get_params_for_language(language):
+    params = {}
+    if language == 'Java':
+        # todo to automate this 
+        # It should be read from pom.xml
+        return params
+    return params
+
+
 def ensure_function_app(repo_name, path=None):
     if path:
         path_to_host = path
@@ -93,7 +105,7 @@ def ensure_function_app(repo_name, path=None):
         raise CLIError('host.json could not be located at {}.'.format(path_to_host))
 
 
-def get_functionapp_yaml_template_for_repo(app_name, repo_name, language, platform):
+def get_functionapp_yaml_template_for_repo(app_name, repo_name, language, platform, params):
     files_to_return = []
     github_workflow_path = '.github/workflows/'
     # Read template file
@@ -103,10 +115,25 @@ def get_functionapp_yaml_template_for_repo(app_name, repo_name, language, platfo
         from azext_deploy_to_azure.dev.common.github_workflow_helper import get_new_workflow_yaml_name
         yaml_file_name = get_new_workflow_yaml_name()
         workflow_yaml = github_workflow_path + yaml_file_name
-    from azext_deploy_to_azure.dev.common.const import APP_NAME_PLACEHOLDER
-    files_to_return.append(Files(path=workflow_yaml,
-                                 content=get_language_to_workflow_mapping(language, platform)
-                                 .replace(APP_NAME_PLACEHOLDER, app_name)))
+    from azext_deploy_to_azure.dev.common.const import (APP_NAME_PLACEHOLDER, FUNCTIONAPP_NAME_PLACEHOLDER,
+                                                        ARTIFACT_ID_PLACEHOLDER)
+    if language == 'Java':
+        pom_functionapp_name = params.get('functionAppName', None)
+        if not pom_functionapp_name:
+            pom_functionapp_name = prompt('FunctionApp Name from pom.xml: ')
+        pom_artifact_id = params.get('artifactId', None)
+        if not pom_artifact_id:
+            pom_artifact_id = prompt('Artifact Id from <project> in pom.xml: ')
+        workflow_file = Files(path=workflow_yaml,
+                              content=get_language_to_workflow_mapping(language, platform)
+                              .replace(APP_NAME_PLACEHOLDER, app_name)
+                              .replace(FUNCTIONAPP_NAME_PLACEHOLDER, pom_functionapp_name)
+                              .replace(ARTIFACT_ID_PLACEHOLDER, pom_artifact_id))
+    else:
+        workflow_file = Files(path=workflow_yaml,
+                              content=get_language_to_workflow_mapping(language, platform)
+                              .replace(APP_NAME_PLACEHOLDER, app_name))
+    files_to_return.append(workflow_file)
     return files_to_return
 
 
