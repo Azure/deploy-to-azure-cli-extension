@@ -281,16 +281,7 @@ jobs:
 """
 
 
-DEPLOY_TO_FUNCTIONAPP_JAVA_WINDOWS_TEMPLATE = """
-# Action Requires
-# 1. Setup the AZURE_CREDENTIALS secrets in your GitHub Repository
-# 2. Replace PLEASE_REPLACE_THIS_WITH_YOUR_FUNCTION_APP_NAME with your Azure function app name
-# 3. Replace POM_ARTIFACT_ID with the value in project <artifactId> in pom.xml
-# 4. Replace POM_FUNCTION_APP_NAME with the value in properties <functionAppName> in pom.xml
-# 5. Add this yaml file to your project's .github/workflows/
-# 6. Push your local project to your GitHub Repository
-
-name: Windows_Java_FunctionApp_CI
+DEPLOY_TO_FUNCTIONAPP_JAVA_WINDOWS_TEMPLATE = """name: Windows_Java_FunctionApp_CI
 
 on: [push, pull_request]
 
