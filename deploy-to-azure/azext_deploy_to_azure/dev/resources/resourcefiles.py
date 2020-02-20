@@ -320,7 +320,7 @@ jobs:
       run: |
         # If your function app project is not located in your repository's root
         # Please change your directory for maven build in pushd
-        pushd ./POM_ARTIFACT_ID
+        pushd ./../artifact_id_place_holder
         mvn clean package
         mvn azure-functions:package
         popd
@@ -332,7 +332,7 @@ jobs:
         app-name: app_name_place_holder
         # If your function app project is not located in your repository's root
         # Please consider prefixing the project path in this package parameter
-        package: ./POM_ARTIFACT_ID/target/azure-functions/POM_FUNCTION_APP_NAME
+        package: ./../artifact_id_place_holder/target/azure-functions/functionapp_name_place_holder
         # If you want to use publish profile credentials instead of Azure Service Principal
         # Please uncomment the following line
         # publish-profile: ${{ secrets.SCM_CREDENTIALS }}
