@@ -6,6 +6,8 @@
 
 ACR_PLACEHOLDER = 'container_registry_name_place_holder'
 APP_NAME_PLACEHOLDER = 'app_name_place_holder'
+ARTIFACT_ID_PLACEHOLDER = 'artifact_id_place_holder'
+FUNCTIONAPP_NAME_PLACEHOLDER = 'functionapp_name_place_holder'
 PORT_NUMBER_PLACEHOLDER = 'port_number_place_holder'
 CLUSTER_PLACEHOLDER = 'cluster_name_place_holder'
 RG_PLACEHOLDER = 'resource_name_place_holder'

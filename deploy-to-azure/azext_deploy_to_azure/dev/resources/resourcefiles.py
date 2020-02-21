@@ -281,16 +281,7 @@ jobs:
 """
 
 
-DEPLOY_TO_FUNCTIONAPP_JAVA_WINDOWS_TEMPLATE = """
-# Action Requires
-# 1. Setup the AZURE_CREDENTIALS secrets in your GitHub Repository
-# 2. Replace PLEASE_REPLACE_THIS_WITH_YOUR_FUNCTION_APP_NAME with your Azure function app name
-# 3. Replace POM_ARTIFACT_ID with the value in project <artifactId> in pom.xml
-# 4. Replace POM_FUNCTION_APP_NAME with the value in properties <functionAppName> in pom.xml
-# 5. Add this yaml file to your project's .github/workflows/
-# 6. Push your local project to your GitHub Repository
-
-name: Windows_Java_FunctionApp_CI
+DEPLOY_TO_FUNCTIONAPP_JAVA_WINDOWS_TEMPLATE = """name: Windows_Java_FunctionApp_CI
 
 on: [push, pull_request]
 
@@ -320,7 +311,7 @@ jobs:
       run: |
         # If your function app project is not located in your repository's root
         # Please change your directory for maven build in pushd
-        pushd ./POM_ARTIFACT_ID
+        pushd ./../artifact_id_place_holder
         mvn clean package
         mvn azure-functions:package
         popd
@@ -332,7 +323,7 @@ jobs:
         app-name: app_name_place_holder
         # If your function app project is not located in your repository's root
         # Please consider prefixing the project path in this package parameter
-        package: ./POM_ARTIFACT_ID/target/azure-functions/POM_FUNCTION_APP_NAME
+        package: ./../artifact_id_place_holder/target/azure-functions/functionapp_name_place_holder
         # If you want to use publish profile credentials instead of Azure Service Principal
         # Please uncomment the following line
         # publish-profile: ${{ secrets.SCM_CREDENTIALS }}
