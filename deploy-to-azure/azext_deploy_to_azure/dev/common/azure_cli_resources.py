@@ -56,11 +56,6 @@ def create_acr(registry_name, resource_group, sku):
         raise CLIError(ex)
 
 
-def create_functionapp(_app_name, _resource_group, _show_warning=True):
-    logger.warning("You can create a new functionapp using command - 'az functionapp create'\
-                    then try again.")
-
-
 def get_resource_group():
     _subscription_id, subscription_name, _tenant_id, _environment_name = get_default_subscription_info()
     logger.warning("Using your default Azure subscription %s for fetching Resource Groups.", subscription_name)
@@ -171,22 +166,16 @@ def get_functionapp_details(name=None):
         raise CLIError('Functionapp with name {} could not be found. Please check using command az functionapp list.'
                        .format(name))
 
-    app_choice_list.append('Create a new Functionapp.')
+    app_choice_list.append('Create a new Azure Function.')
     app_details = None
-    functionapp_choice = prompt_user_friendly_choice_list(
-        "Which Functionapp do you want to target?", app_choice_list)
-    if functionapp_choice == len(app_choice_list) - 1:
-        app_name = prompt('Please enter name of the Functionapp to be created: ')
-        resource_group = get_resource_group()
-        # check if app already exists
-        for app in functionapp_list:
-            if app_name.lower() == app['name'].lower() and app['resourceGroup']:
-                logger.warning('Functionapp with the same name already exists. Using the existing app.')
-                app_details = app
-        if not app_details:
-            create_functionapp(app_name, resource_group)
-    else:
-        app_details = functionapp_list[functionapp_choice]
+    while not app_details:
+        functionapp_choice = prompt_user_friendly_choice_list(
+            "Which Azure Function do you want to target?", app_choice_list)
+        if functionapp_choice == len(app_choice_list) - 1:
+            logger.warning("Creation is not supported from up command. You can create a new functionapp using command "
+                           "'az functionapp create' then try again.")
+        else:
+            app_details = functionapp_list[functionapp_choice]
     return app_details
 
 
