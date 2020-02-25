@@ -42,6 +42,8 @@ def get_azure_credentials_functionapp(repo_name, app_name):
     if check_secret_exists(repo_name, 'AZURE_CREDENTIALS'):
         logger.warning('Skipped creating AZURE_CREDENTIALS as it already exists')
     else:
+        if not app_name.startswith('http'):
+            app_name = 'http://{}'.format(app_name)
         auth_details = subprocess.check_output(
             'az ad sp create-for-rbac --name {} --role contributor --sdk-auth -o json'.format(app_name),
             shell=True)
