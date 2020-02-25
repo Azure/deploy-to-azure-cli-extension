@@ -25,7 +25,7 @@ def load_functionapp_help():
       - name: Deploy/Setup GitHub Action for locally checked out GitHub Repository to Azure Function
         text: |
           Repository name/url (--repository) will be detected from the local git repository
-          az functionapp app up --app-name AzFunctionPythonPreProd 
+          az functionapp app up --app-name AzFunctionPythonPreProd
 
       - name: Deploy/Setup GitHub action for a GitHub Repository to Azure Function
         text: |
