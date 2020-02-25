@@ -47,7 +47,7 @@ def push_files_github(files, repo_name, branch, commit_to_branch,
     branch_name = create_github_branch(repo=repo_name, source=branch, new_branch=branch_name)
     commit_files_to_github_branch(files, repo_name, branch_name, message)
     pr = create_pr_github(branch, branch_name, repo_name, message)
-    print('Created a Pull Request - {url}'.format(url=pr['url']))
+    print('Created a Pull Request - {url}'.format(url=pr['html_url']))
     return None
 
 
