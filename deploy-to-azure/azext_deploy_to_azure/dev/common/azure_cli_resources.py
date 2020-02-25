@@ -8,7 +8,7 @@ import json
 from knack.log import get_logger
 from knack.prompting import prompt
 from knack.util import CLIError
-from azext_deploy_to_azure.dev.common.prompting import prompt_user_friendly_choice_list
+from azext_deploy_to_azure.dev.common.prompting import prompt_user_friendly_choice_list, prompt_not_empty
 
 logger = get_logger(__name__)
 
@@ -100,7 +100,7 @@ def get_aks_details(name=None):
     cluster_choice = prompt_user_friendly_choice_list(
         "Which kubernetes cluster do you want to target?", cluster_choice_list)
     if cluster_choice == len(cluster_choice_list) - 1:
-        cluster_name = prompt('Please enter name of the cluster to be created: ')
+        cluster_name = prompt_not_empty('Please enter name of the cluster to be created: ')
         resource_group = get_resource_group()
         # check if cluster already exists
         for aks_cluster in aks_list:
@@ -138,7 +138,7 @@ def get_acr_details(name=None):
         "Which Azure Container Registry do you want to use?", registry_choice_list)
     acr_details = None
     if registry_choice == len(registry_choice_list) - 1:
-        registry_name = prompt('Please enter name of the Azure Container Registry to be created: ')
+        registry_name = prompt_not_empty('Please enter name of the Azure Container Registry to be created: ')
         for registry in acr_list:
             if registry_name.lower() == registry['name'].lower():
                 logger.warning('Azure Container Registry with the same name already exists. '
