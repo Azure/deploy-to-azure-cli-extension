@@ -166,17 +166,9 @@ def get_functionapp_details(name=None):
         raise CLIError('Functionapp with name {} could not be found. Please check using command az functionapp list.'
                        .format(name))
 
-    app_choice_list.append('Create a new Azure Function.')
-    app_details = None
-    while not app_details:
-        functionapp_choice = prompt_user_friendly_choice_list(
-            "Which Azure Function do you want to target?", app_choice_list)
-        if functionapp_choice == len(app_choice_list) - 1:
-            logger.warning("Creation is not supported from up command. You can create a new functionapp using command "
-                           "'az functionapp create' then try again.")
-        else:
-            app_details = functionapp_list[functionapp_choice]
-    return app_details
+    functionapp_choice = prompt_user_friendly_choice_list(
+        "Which Functionapp do you want to target?", app_choice_list)
+    return functionapp_list[functionapp_choice]
 
 
 def get_sku():
