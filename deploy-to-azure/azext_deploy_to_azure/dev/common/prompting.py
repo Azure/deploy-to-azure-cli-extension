@@ -6,6 +6,7 @@
 import sys
 
 from knack.log import get_logger
+from knack.util import CLIError
 from knack.prompting import NoTTYException, verify_is_a_tty, prompt
 
 logger = get_logger(__name__)
@@ -22,7 +23,8 @@ def delete_last_line():
     deinit()
 
 
-def prompt_user_friendly_choice_list(msg, a_list, default=1, help_string=None, error_msg=None):
+def prompt_user_friendly_choice_list(msg, a_list, default=1, help_string=None, error_msg=None,
+                                     error_msg_empty_list=None):
     """Prompt user to select from a list of possible choices.
     :param msg: A message displayed to the user before the choice list
     :type msg: str
@@ -36,6 +38,10 @@ def prompt_user_friendly_choice_list(msg, a_list, default=1, help_string=None, e
     :type error_msg: str
     :returns: The list index of the item chosen.
     """
+    if not a_list:
+        if not error_msg_empty_list:
+            error_msg_empty_list = '{} Error: No options to load.'.format(msg)
+        raise CLIError(error_msg_empty_list)
     verify_is_a_tty_or_raise_error(error_msg=error_msg)
     options = '\n'.join([' [{}] {}{}'
                          .format(i + 1,
