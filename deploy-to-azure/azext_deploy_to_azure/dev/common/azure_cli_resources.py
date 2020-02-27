@@ -6,7 +6,6 @@
 import subprocess
 import json
 from knack.log import get_logger
-from knack.prompting import prompt
 from knack.util import CLIError
 from azext_deploy_to_azure.dev.common.prompting import prompt_user_friendly_choice_list, prompt_not_empty
 
