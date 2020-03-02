@@ -29,8 +29,8 @@ def get_azure_credentials(repo_name):
     msg = 'Secret(s) named REGISTRY_USERNAME and/or REGISTRY_PASSWORD already exists in your repo. '\
         'Do you want to overwrite it?'
     if (check_secret_exists(repo_name, 'REGISTRY_USERNAME') or check_secret_exists(repo_name, 'REGISTRY_PASSWORD'))\
-        and not prompt_y_n(msg, default="n"):
-            logger.warning('Skipped creating REGISTRY_USERNAME and REGISTRY_PASSWORD as it already exists')
+    and not prompt_y_n(msg, default="n"):
+        logger.warning('Skipped creating REGISTRY_USERNAME and REGISTRY_PASSWORD as it already exists')
     else:
         sp_details = subprocess.check_output('az ad sp create-for-rbac -o json', shell=True)
         sp_details_json = json.loads(sp_details)
