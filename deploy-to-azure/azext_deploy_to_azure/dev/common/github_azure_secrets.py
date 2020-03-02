@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.log import get_logger
+from knack.prompting import prompt_y_n
 from azext_deploy_to_azure.dev.common.azure_cli_resources import get_default_subscription_info
 from azext_deploy_to_azure.dev.common.github_api_helper import check_secret_exists, create_repo_secret
 
@@ -15,7 +16,8 @@ def get_azure_credentials(repo_name):
     import json
     _subscription_id, _subscription_name, _tenant_id, _environment_name = get_default_subscription_info()
     print('Creating AZURE_CREDENTIALS secret...')
-    if check_secret_exists(repo_name, 'AZURE_CREDENTIALS'):
+    msg = 'Secret named AZURE_CREDENTIALS already exists in your repo. Do you want to overwrite it?'
+    if check_secret_exists(repo_name, 'AZURE_CREDENTIALS') and not prompt_y_n(msg, default="n"):
         logger.warning('Skipped creating AZURE_CREDENTIALS as it already exists')
     else:
         auth_details = subprocess.check_output('az ad sp create-for-rbac --sdk-auth -o json', shell=True)
@@ -24,7 +26,11 @@ def get_azure_credentials(repo_name):
         create_repo_secret(repo_name, 'AZURE_CREDENTIALS', auth_details_string)
     print('')
     print('Creating REGISTRY_USERNAME and REGISTRY_PASSWORD...')
-    if check_secret_exists(repo_name, 'REGISTRY_USERNAME') and check_secret_exists(repo_name, 'REGISTRY_PASSWORD'):
+    msg = 'Secret(s) named REGISTRY_USERNAME and/or REGISTRY_PASSWORD already exists in your repo. '\
+        'Do you want to overwrite it?'
+    if ((check_secret_exists(repo_name, 'REGISTRY_USERNAME') or
+         check_secret_exists(repo_name, 'REGISTRY_PASSWORD')) and
+            not prompt_y_n(msg, default="n")):
         logger.warning('Skipped creating REGISTRY_USERNAME and REGISTRY_PASSWORD as it already exists')
     else:
         sp_details = subprocess.check_output('az ad sp create-for-rbac -o json', shell=True)
