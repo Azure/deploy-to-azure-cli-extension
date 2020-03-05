@@ -34,9 +34,9 @@ def aci_up(acr=None, repository=None, port=None, branch_name=None,
     :type repository: string
     :param port: Port on which your application runs. Default is 8080
     :type port: str
-    :param branch_name: New Branch Name to be created to check in files and raise a PR
+    :param branch_name: New branch name to be created to check in files and raise a PR
     :type branch_name: str
-    :param do_not_wait: Do not wait for Workflow Completion
+    :param do_not_wait: Do not wait for workflow completion
     :type do_not_wait: bool
     """
     # TODO: Use the ACI Deploy Action when Published
