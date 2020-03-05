@@ -34,9 +34,9 @@ def aci_up(acr=None, repository=None, port=None, branch_name=None,
     :type repository: string
     :param port: Port on which your application runs. Default is 8080
     :type port: str
-    :param branch_name: New Branch Name to be created to check in files and raise a PR
+    :param branch_name: New branch name to be created to check in files and raise a PR
     :type branch_name: str
-    :param do_not_wait: Do not wait for Workflow Completion
+    :param do_not_wait: Do not wait for workflow completion
     :type do_not_wait: bool
     """
     # TODO: Use the ACI Deploy Action when Published
@@ -143,7 +143,7 @@ def get_app_url(acr_details, app_name):
     resource_group = acr_details['resourceGroup']
     url_find_command = 'az container show \
         --name {app_name} --resource-group {resource_group_name} \
-            --query ipAddress.fqdn'.format(app_name=app_name, resource_group_name=resource_group)
+        --query ipAddress.fqdn -o json'.format(app_name=app_name, resource_group_name=resource_group)
     url_result = sb.check_output(url_find_command, shell=True)
     url_result = url_result.decode().strip().lstrip('\"').rstrip('\"')
     app_url = "http://" + url_result
