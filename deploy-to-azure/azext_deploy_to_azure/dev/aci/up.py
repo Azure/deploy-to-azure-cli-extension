@@ -143,7 +143,7 @@ def get_app_url(acr_details, app_name):
     resource_group = acr_details['resourceGroup']
     url_find_command = 'az container show \
         --name {app_name} --resource-group {resource_group_name} \
-            --query ipAddress.fqdn'.format(app_name=app_name, resource_group_name=resource_group)
+        --query ipAddress.fqdn -o json'.format(app_name=app_name, resource_group_name=resource_group)
     url_result = sb.check_output(url_find_command, shell=True)
     url_result = url_result.decode().strip().lstrip('\"').rstrip('\"')
     app_url = "http://" + url_result
