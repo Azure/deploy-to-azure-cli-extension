@@ -11,5 +11,5 @@ functionappops = CliCommandType(
 
 
 def load_functionapp_commands(self, _):
-    with self.command_group('functionapp app', command_type=functionappops) as g:
+    with self.command_group('functionapp app', command_type=functionappops, is_preview=True) as g:
         g.command('up', 'functionapp_deploy')

@@ -11,5 +11,5 @@ aksops = CliCommandType(
 
 
 def load_aks_commands(self, _):
-    with self.command_group('aks app', command_type=aksops) as g:
+    with self.command_group('aks app', command_type=aksops, is_preview=True) as g:
         g.command('up', 'aks_deploy')
