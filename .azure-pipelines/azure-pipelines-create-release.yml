@@ -94,7 +94,7 @@ jobs:
 
   - task: GitHubRelease@0
     inputs:
-      gitHubConnection: Gsaral
+      gitHubConnection: GitHub - ishitam8
       repositoryName: Azure/deploy-to-azure-cli-extension
       action: 'create'
       target: '$(Build.SourceVersion)'
