@@ -50,7 +50,7 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
 setup(
     name=NAME,
     version=VERSION,
-    description="Extension to deploy to Azure.",
+    description="Deploy to Azure using Github Actions.",
     long_description=README + '\n\n' + HISTORY,
     license='MIT',
     author="Microsoft",
