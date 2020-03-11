@@ -55,7 +55,7 @@ setup(
     license='MIT',
     author="Microsoft",
     author_email="VSTS_Social@microsoft.com",
-    url="https://github.com/atbagga/aks-deploy-cli-extension",
+    url="https://github.com/Azure/deploy-to-azure-cli-extension",
     classifiers=CLASSIFIERS,
     package_data={'azext_deploy_to_azure': ['azext_metadata.json']},
     packages=find_packages(exclude=["*.test", "*.test.*", "test.*", "test"]),
