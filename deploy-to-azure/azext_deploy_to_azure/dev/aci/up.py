@@ -17,7 +17,7 @@ from azext_deploy_to_azure.dev.common.github_workflow_helper import poll_workflo
 from azext_deploy_to_azure.dev.common.github_azure_secrets import get_azure_credentials
 from azext_deploy_to_azure.dev.common.const import (CHECKIN_MESSAGE_ACI, APP_NAME_PLACEHOLDER,
                                                     ACR_PLACEHOLDER, RG_PLACEHOLDER, PORT_NUMBER_DEFAULT,
-                                                    PORT_NUMBER_PLACEHOLDER)
+                                                    PORT_NUMBER_PLACEHOLDER, LOCATION_PLACEHOLDER)
 from azext_deploy_to_azure.dev.aks.docker_helm_template import get_docker_templates
 
 logger = get_logger(__name__)
@@ -134,6 +134,7 @@ def get_yaml_template_for_repo(acr_details, repo_name, port):
                                  .replace(APP_NAME_PLACEHOLDER, app_name)
                                  .replace(ACR_PLACEHOLDER, acr_details['name'])
                                  .replace(RG_PLACEHOLDER, acr_details['resourceGroup'])
+                                 .replace(LOCATION_PLACEHOLDER, acr_details['location'])
                                  .replace(PORT_NUMBER_PLACEHOLDER, port)))
     return files_to_return
 

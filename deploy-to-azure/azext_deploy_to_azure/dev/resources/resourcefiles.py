@@ -74,6 +74,20 @@ jobs:
             creds: ${{ SECRETS.AZURE_CREDENTIALS }}
 
         - name: 'Deploy to Azure Container Instances'
+          uses: azure/aci-deploy-action@v1
+          with:
+            resource-group resource_name_place_holder
+            name: app_name_place_holder
+            image: container_registry_name_place_holder.azurecr.io/app_name_place_holder:${{ github.sha }}
+            ports: 80 port_number_place_holder
+            dns-name-label: app_name_place_holder
+            registry-login-server: container_registry_name_place_holder.azurecr.io
+            registry-username: ${{ SECRETS.REGISTRY_USERNAME }}
+            registry-password: ${{ SECRETS>REGISTRY_PASSWORD }}
+            location: location_place_holder
+
+
+        - name: 'Deploy to Azure Container Instances'
           uses: azure/CLI@v1
           with:
             azcliversion: 2.0.77
