@@ -74,7 +74,7 @@ jobs:
             creds: ${{ SECRETS.AZURE_CREDENTIALS }}
 
         - name: 'Deploy to Azure Container Instances'
-          uses: azure/aci-deploy-action@v1
+          uses: azure/aci-deploy@v1
           with:
             resource-group resource_name_place_holder
             name: app_name_place_holder
