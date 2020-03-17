@@ -84,16 +84,7 @@ jobs:
             registry-login-server: container_registry_name_place_holder.azurecr.io
             registry-username: ${{ SECRETS.REGISTRY_USERNAME }}
             registry-password: ${{ SECRETS>REGISTRY_PASSWORD }}
-            location: location_place_holder
-
-
-        - name: 'Deploy to Azure Container Instances'
-          uses: azure/CLI@v1
-          with:
-            azcliversion: 2.0.77
-            inlineScript: |
-              az container create --resource-group resource_name_place_holder --name app_name_place_holder --image container_registry_name_place_holder.azurecr.io/app_name_place_holder:${{ github.sha }} --ports 80 port_number_place_holder --dns-name-label app_name_place_holder --registry-username ${{ SECRETS.REGISTRY_USERNAME }} --registry-password ${{ SECRETS.REGISTRY_PASSWORD }}
-"""
+            location: location_place_holder"""
 
 
 DEPLOY_TO_FUNCTIONAPP_PYTHON_LINUX_TEMPLATE = """name: Linux_Python_FunctionApp_CI
