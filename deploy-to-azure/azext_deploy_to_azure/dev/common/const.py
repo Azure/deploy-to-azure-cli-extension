@@ -11,6 +11,7 @@ FUNCTIONAPP_NAME_PLACEHOLDER = 'functionapp_name_place_holder'
 PORT_NUMBER_PLACEHOLDER = 'port_number_place_holder'
 CLUSTER_PLACEHOLDER = 'cluster_name_place_holder'
 RG_PLACEHOLDER = 'resource_name_place_holder'
+LOCATION_PLACEHOLDER = 'location_place_holder'
 
 PORT_NUMBER_DEFAULT = '8080'
 APP_NAME_DEFAULT = 'k8sdemo'
