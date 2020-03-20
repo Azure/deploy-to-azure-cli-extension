@@ -15,6 +15,6 @@ def load_aci_help():
 
     helps['container app up'] = """
     type: command
-    short-summary: Deploy to Azure Container Instances using GitHub Actions
+    short-summary: Deploy to Azure Container Instances using GitHub Actions. Refer https://aka.ms/aci-deploy-action for more information. 
     long-summary:
     """
