@@ -22,7 +22,7 @@ def poll_workflow_status(repo_name, check_run_id):
     if check_run_status == 'queued':
         # When workflow status is Queued
         colorama.init()
-        with humanfriendly.Spinner(label="Workflow is in queue") as spinner:
+        with humanfriendly.Spinner(label="Workflow is in queue") as spinner:  # pylint: disable=no-member
             while True:
                 spinner.step()
                 time.sleep(0.5)
@@ -33,7 +33,7 @@ def poll_workflow_status(repo_name, check_run_id):
     if check_run_status == 'in_progress':
         # When workflow status is inprogress
         colorama.init()
-        with humanfriendly.Spinner(label="Workflow is in progress") as spinner:
+        with humanfriendly.Spinner(label="Workflow is in progress") as spinner:  # pylint: disable=no-member
             while True:
                 spinner.step()
                 time.sleep(0.5)
