@@ -6,8 +6,8 @@
 The Deploy to Azure extension alleviates developer pain in building workflows that target Azure by abstracting away the configuration pain and reducing concept count.
 
 ## Installing the extension
-The Deploy to Azure is distributed as an extension to [Azure CLI](https://docs.microsoft.com/cli/azure/what-is-azure-cli?view=azure-cli-latest). Follow the steps given below to install the extension.
-1. [Install Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest) . You must have at least `v2.0.60`, which you can verify with `az --version` command.
+The Deploy to Azure is distributed as an extension to [Azure CLI](https://docs.microsoft.com/cli/azure/what-is-azure-cli). Follow the steps given below to install the extension.
+1. [Install Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli) . You must have at least `v2.0.60`, which you can verify with `az --version` command.
 2. Add Deploy to Azure extension by running the command  
 `az extension add --name deploy-to-azure`
 
@@ -15,7 +15,7 @@ The Deploy to Azure is distributed as an extension to [Azure CLI](https://docs.m
 The `az aks app up` command builds the application container image, pushes the image to [Azure Container Registry](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-intro), and deploys the image to an [Azure Kuberentes Service](https://docs.microsoft.com/azure/aks/intro-kubernetes) instance. Follow the steps below to get started.
 
 1. You need to be logged in to Azure CLI. Run the `az login` command.  
-If the CLI can open your default browser, it will do so and load a sign-in page. Otherwise, you need to open a browser page and follow the instructions on the command line to enter an authorization code after navigating to https://aka.ms/devicelogin in your browser. For more information, see the [Azure CLI login page](https://docs.microsoft.com/cli/azure/authenticate-azure-cli?view=azure-cli-latest).
+If the CLI can open your default browser, it will do so and load a sign-in page. Otherwise, you need to open a browser page and follow the instructions on the command line to enter an authorization code after navigating to https://aka.ms/devicelogin in your browser. For more information, see the [Azure CLI login page](https://docs.microsoft.com/cli/azure/authenticate-azure-cli).
 
 2. Run the command `az aks app up` and provide the GitHub repository URL  
 `az aks app up -r https://github.com/contoso/samplerepo`  
@@ -43,7 +43,7 @@ In the absence of a docker file, the command generates a docker file based on th
 The `az container app up` command builds the application container image, pushes the image to an ACR and deploys the image to an [Azure Container Instance](https://docs.microsoft.com/azure/container-instances/container-instances-overview). Follow the steps below to get started.
 
 1. You need to be logged in to Azure CLI. Run the `az login` command.  
-If the CLI can open your default browser, it will do so and load a sign-in page. Otherwise, you need to open a browser page and follow the instructions on the command line to enter an authorization code after navigating to https://aka.ms/devicelogin in your browser. For more information, see the [Azure CLI login page](https://docs.microsoft.com/cli/azure/authenticate-azure-cli?view=azure-cli-latest).
+If the CLI can open your default browser, it will do so and load a sign-in page. Otherwise, you need to open a browser page and follow the instructions on the command line to enter an authorization code after navigating to https://aka.ms/devicelogin in your browser. For more information, see the [Azure CLI login page](https://docs.microsoft.com/cli/azure/authenticate-azure-cli).
 
 2. Run the command `az container app up` and provide the GitHub repository URL  
 `az container app up -r https://github.com/contoso/samplerepo`  
