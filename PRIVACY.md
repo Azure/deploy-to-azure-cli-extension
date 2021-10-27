@@ -7,4 +7,4 @@
  ### Enabling/Disabling Telemetry
 
 We inherit the telemetry settings from azure-cli.
-Run `az configure` to enable/disable data collection.
+Run `az config` to enable/disable data collection.
